@@ -93,6 +93,15 @@ async function initDB() {
                 likes INTEGER DEFAULT 0,
                 createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+            CREATE TABLE IF NOT EXISTS paintings (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                imageUrls TEXT DEFAULT '[]',
+                date TEXT DEFAULT '',
+                likes INTEGER DEFAULT 0,
+                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
             CREATE TABLE IF NOT EXISTS socials (
                 id TEXT PRIMARY KEY,
                 platform TEXT NOT NULL,
@@ -184,6 +193,7 @@ function parseItem(item) {
     const result = { ...item };
     if (result.tech) result.tech = JSON.parse(result.tech);
     if (result.authors) result.authors = JSON.parse(result.authors);
+    if (result.imageUrls) result.imageUrls = JSON.parse(result.imageUrls);
     return result;
 }
 
@@ -191,6 +201,7 @@ function stringifyItem(body) {
     const result = { ...body };
     if (Array.isArray(result.tech)) result.tech = JSON.stringify(result.tech);
     if (Array.isArray(result.authors)) result.authors = JSON.stringify(result.authors);
+    if (Array.isArray(result.imageUrls)) result.imageUrls = JSON.stringify(result.imageUrls);
     return result;
 }
 
@@ -299,18 +310,23 @@ createCrudRoutes("publications", "publications");
 createCrudRoutes("blogs", "blogs");
 createCrudRoutes("notes", "notes");
 createCrudRoutes("brain-dumps", "brain_dumps");
+createCrudRoutes("paintings", "paintings");
 createCrudRoutes("contacts", "socials");
 
-// ── Like a brain dump (IP Tracked Toggling) ──────────────────
-app.post("/api/brain-dumps/:id/like", async (req, res) => {
-    const { id } = req.params;
+// ── Like an item (IP Tracked Toggling) ──────────────────
+app.post("/api/:type/:id/like", async (req, res) => {
+    const { type, id } = req.params;
+    const allowedTypes = ["brain-dumps", "paintings"];
+    if (!allowedTypes.includes(type)) return res.status(400).json({ error: "Invalid type" });
+
+    const tableName = type === "brain-dumps" ? "brain_dumps" : "paintings";
+
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
     if (typeof ip === 'string' && ip.includes(',')) ip = ip.split(',')[0].trim();
 
-    console.log(`[LIKE] Attempt for ID: ${id} from IP: ${ip}`);
+    console.log(`[LIKE] Attempt for ${type} ID: ${id} from IP: ${ip}`);
 
     try {
-        // We use a manual check but enforced by DB constraints
         const check = await db.execute({
             sql: "SELECT 1 FROM like_logs WHERE item_id = ? AND ip_address = ?",
             args: [id, ip]
@@ -318,23 +334,22 @@ app.post("/api/brain-dumps/:id/like", async (req, res) => {
 
         const alreadyLiked = check.rows.length > 0;
 
-        // Start transaction if possible (Turso supports batches)
         if (alreadyLiked) {
             console.log(`[LIKE] Unliking for IP: ${ip}`);
             await db.batch([
-                { sql: "UPDATE brain_dumps SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END WHERE id = ?", args: [id] },
+                { sql: `UPDATE ${tableName} SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END WHERE id = ?`, args: [id] },
                 { sql: "DELETE FROM like_logs WHERE item_id = ? AND ip_address = ?", args: [id, ip] }
             ], "write");
         } else {
             console.log(`[LIKE] Liking for IP: ${ip}`);
             await db.batch([
                 { sql: "INSERT INTO like_logs (item_id, ip_address) VALUES (?, ?)", args: [id, ip] },
-                { sql: "UPDATE brain_dumps SET likes = likes + 1 WHERE id = ?", args: [id] }
+                { sql: `UPDATE ${tableName} SET likes = likes + 1 WHERE id = ?`, args: [id] }
             ], "write");
         }
 
         const result = await db.execute({
-            sql: "SELECT likes FROM brain_dumps WHERE id = ?",
+            sql: `SELECT likes FROM ${tableName} WHERE id = ?`,
             args: [id]
         });
 
@@ -342,7 +357,6 @@ app.post("/api/brain-dumps/:id/like", async (req, res) => {
         res.json({ likes: currentLikes, liked: !alreadyLiked });
     } catch (err) {
         console.error(`[LIKE] Error: ${err.message}`);
-        // If it failed because of Unique Constraint, it means they liked it in a race condition
         res.status(500).json({ error: "Could not process like. Please try again." });
     }
 });

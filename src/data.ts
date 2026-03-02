@@ -85,6 +85,15 @@ export interface Social {
   label: string;
 }
 
+export interface Painting {
+  id: string;
+  title: string;
+  description: string;
+  imageUrls: string[];
+  date?: string;
+  likes?: number;
+}
+
 // --- Async fetchers (try API first, fallback to defaults) ---
 
 export async function fetchProjects(): Promise<Project[]> {
@@ -127,6 +136,14 @@ export async function fetchBrainDumps(): Promise<BrainDump[]> {
   }
 }
 
+export async function fetchPaintings(): Promise<Painting[]> {
+  try {
+    return await api.getAll<Painting>("paintings");
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchSocials(): Promise<Social[]> {
   try {
     return await api.getAll<Social>("contacts");
@@ -143,6 +160,7 @@ export function getPublications(): Publication[] { return _pub; }
 export function getBlogs(): BlogPost[] { return _b; }
 export function getNotes(): Note[] { return _n; }
 export function getBrainDumps(): BrainDump[] { return _bd; }
+export function getPaintings(): Painting[] { return []; }
 export function getSocials(): Social[] { return _s; }
 
 // Legacy static exports for backward compatibility
@@ -151,4 +169,5 @@ export const publications: Publication[] = _pub;
 export const blogs: BlogPost[] = _b;
 export const notes: Note[] = _n;
 export const brainDumps: BrainDump[] = _bd;
+export const paintings: Painting[] = [];
 export const socials: Social[] = _s;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchBrainDumps, BRAIN_DUMP_CATEGORIES } from "../data";
-import { likeBrainDump } from "../api";
+import { toggleLikeCount } from "../api";
 import type { BrainDump } from "../data";
 
 type SortMode = "recent" | "oldest" | "popular" | "unpopular";
@@ -31,7 +31,7 @@ export default function BrainDumpPage() {
 
   const handleLike = async (id: string) => {
     try {
-      const res = await likeBrainDump(id);
+      const res = await toggleLikeCount("brain-dumps", id);
       setDumps((prev) =>
         prev.map((d) =>
           d.id === id ? { ...d, likes: res.likes } : d

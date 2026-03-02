@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchBrainDumps } from "../data";
-import { likeBrainDump } from "../api";
+import { toggleLikeCount } from "../api";
 import type { BrainDump } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
 
@@ -22,7 +22,7 @@ export default function BrainDumpDetail() {
   const handleLike = async () => {
     if (!dump || !id) return;
     try {
-      const res = await likeBrainDump(id);
+      const res = await toggleLikeCount("brain-dumps", id);
       setDumps((prev) =>
         prev.map((d) =>
           d.id === id ? { ...d, likes: res.likes } : d

@@ -1,10 +1,10 @@
 // ============================================================
 // Admin Store — talks to Express API
 // ============================================================
-import type { Project, BlogPost, Publication, Note, BrainDump, Social } from "../data";
+import type { Project, BlogPost, Publication, Note, BrainDump, Social, Painting } from "../data";
 import * as api from "../api";
 
-export type { Project, BlogPost, Publication, Note, BrainDump, Social };
+export type { Project, BlogPost, Publication, Note, BrainDump, Social, Painting };
 
 // Resource name mapping
 const RESOURCES = {
@@ -13,6 +13,7 @@ const RESOURCES = {
   publications: "publications",
   notes: "notes",
   brainDumps: "brain-dumps",
+  paintings: "paintings",
   contacts: "contacts",
 } as const;
 
@@ -51,6 +52,12 @@ export const store = {
   createBrainDump: async (d: BrainDump): Promise<BrainDump> => api.create<BrainDump>(RESOURCES.brainDumps, d),
   updateBrainDump: async (d: BrainDump): Promise<BrainDump> => api.update<BrainDump>(RESOURCES.brainDumps, d.id, d),
   deleteBrainDump: async (id: string): Promise<void> => api.remove(RESOURCES.brainDumps, id),
+
+  // Paintings
+  getPaintings: async (): Promise<Painting[]> => api.getAll<Painting>(RESOURCES.paintings),
+  createPainting: async (d: Painting): Promise<Painting> => api.create<Painting>(RESOURCES.paintings, d),
+  updatePainting: async (d: Painting): Promise<Painting> => api.update<Painting>(RESOURCES.paintings, d.id, d),
+  deletePainting: async (id: string): Promise<void> => api.remove(RESOURCES.paintings, id),
 
   // Contacts
   getContacts: async (): Promise<Social[]> => api.getAll<Social>(RESOURCES.contacts),

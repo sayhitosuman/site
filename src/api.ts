@@ -104,9 +104,9 @@ export async function bulkReplace<T>(resource: string, items: T[]): Promise<void
     });
 }
 
-// ── Like a brain dump (public) ───────────────────────────────
-export async function likeBrainDump(id: string): Promise<{ likes: number }> {
-    return apiFetch<{ likes: number }>(`/brain-dumps/${id}/like`, {
+// ── Like an item (public) ───────────────────────────────
+export async function toggleLikeCount(resource: "brain-dumps" | "paintings", id: string): Promise<{ likes: number, liked: boolean }> {
+    return apiFetch<{ likes: number, liked: boolean }>(`/${resource}/${id}/like`, {
         method: "POST",
     });
 }

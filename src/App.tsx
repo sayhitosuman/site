@@ -27,6 +27,7 @@ import BlogsManager from "./admin/BlogsManager";
 import PublicationsManager from "./admin/PublicationsManager";
 import NotesManager from "./admin/NotesManager";
 import BrainDumpsManager from "./admin/BrainDumpsManager";
+import PaintingsManager from "./admin/PaintingsManager";
 import ContactsManager from "./admin/ContactsManager";
 import BackendGatekeeper from "./admin/BackendGatekeeper";
 
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="publications" element={<PublicationsManager />} />
           <Route path="notes" element={<NotesManager />} />
           <Route path="brain-dumps" element={<BrainDumpsManager />} />
+          <Route path="paintings" element={<PaintingsManager />} />
           <Route path="contacts" element={<ContactsManager />} />
         </Route>
 

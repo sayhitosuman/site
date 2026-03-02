@@ -9,6 +9,7 @@ const nav = [
   { to: "/backend/publications", label: "◉ Publications" },
   { to: "/backend/notes", label: "◇ Notes" },
   { to: "/backend/brain-dumps", label: "⚡ Brain Dumps" },
+  { to: "/backend/paintings", label: "🎨 Paintings" },
   { to: "/backend/contacts", label: "@ Contacts" },
 ];
 
