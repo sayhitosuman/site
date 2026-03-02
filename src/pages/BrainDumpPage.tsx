@@ -84,54 +84,60 @@ export default function BrainDumpPage() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setShowTags(!showTags)}
-          className={`flex-1 px-4 py-2 text-xs font-mono rounded border transition-colors ${showTags
+          className={`flex-1 px-4 py-2 text-xs font-mono rounded border transition-colors flex items-center justify-between ${showTags
             ? "border-[#f34e0c] text-[#f34e0c] bg-[#f34e0c]/5"
             : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[#f34e0c] hover:text-[#f34e0c]"
             }`}
         >
-          {showTags ? "Hide Tags" : "Filter by Tags"}
+          <span>{activeCategory ? `Tag: ${activeCategory}` : "Filter by Tags"}</span>
+          <span className="text-[10px] opacity-50">{showTags ? "▲" : "▼"}</span>
         </button>
         <button
           onClick={() => setShowSort(!showSort)}
-          className={`flex-1 px-4 py-2 text-xs font-mono rounded border transition-colors ${showSort
+          className={`flex-1 px-4 py-2 text-xs font-mono rounded border transition-colors flex items-center justify-between ${showSort
             ? "border-[#f34e0c] text-[#f34e0c] bg-[#f34e0c]/5"
             : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[#f34e0c] hover:text-[#f34e0c]"
             }`}
         >
-          {showSort ? "Hide Sort" : "Sort Options"}
+          <span>Sort: {sortMode}</span>
+          <span className="text-[10px] opacity-50">{showSort ? "▲" : "▼"}</span>
         </button>
       </div>
 
       {showTags && (
-        <div className="flex flex-wrap gap-2 mb-8 animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="flex flex-col gap-1 mb-8 p-2 border border-[var(--color-rule)] rounded-md animate-in fade-in slide-in-from-top-1 duration-200">
           {BRAIN_DUMP_CATEGORIES.map((cat) => (
             <button
               key={cat}
-              onClick={() => handleCategoryClick(cat)}
-              className={`px-3 py-1 text-xs font-mono rounded-full border transition-colors ${activeCategory === cat
-                ? "bg-[#f34e0c] text-white border-[#f34e0c]"
-                : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[#f34e0c] hover:text-[var(--color-ink)]"
+              onClick={() => { handleCategoryClick(cat); setShowTags(false); }}
+              className={`w-full text-left px-3 py-2 text-xs font-mono rounded transition-colors ${activeCategory === cat
+                ? "bg-[#f34e0c] text-white"
+                : "text-[var(--color-muted)] hover:bg-[var(--color-rule)] hover:text-[var(--color-ink)]"
                 }`}
             >
               {cat}
             </button>
           ))}
           {activeCategory && (
-            <button onClick={() => { setActiveCategory(null); setSearchParams({}); }} className="px-3 py-1 text-xs font-mono text-[var(--color-muted)] hover:text-[#f34e0c] underline">clear</button>
+            <button
+              onClick={() => { setActiveCategory(null); setSearchParams({}); setShowTags(false); }}
+              className="w-full text-left px-3 py-2 text-xs font-mono text-[var(--color-muted)] hover:text-[#f34e0c] border-t border-[var(--color-rule)] mt-1"
+            >
+              Clear filter
+            </button>
           )}
         </div>
       )}
 
       {showSort && (
-        <div className="flex items-center gap-2 mb-6 animate-in fade-in slide-in-from-top-1 duration-200">
-          <span className="text-xs font-mono text-[var(--color-muted)] mr-1">sort:</span>
+        <div className="flex flex-col gap-1 mb-6 p-2 border border-[var(--color-rule)] rounded-md animate-in fade-in slide-in-from-top-1 duration-200">
           {(["recent", "oldest", "popular", "unpopular"] as SortMode[]).map((mode) => (
             <button
               key={mode}
-              onClick={() => setSortMode(mode)}
-              className={`px-3 py-1 text-xs font-mono rounded-full border transition-colors ${sortMode === mode
-                ? "bg-[#f34e0c] text-white border-[#f34e0c]"
-                : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[#f34e0c] hover:text-[var(--color-ink)]"
+              onClick={() => { setSortMode(mode); setShowSort(false); }}
+              className={`w-full text-left px-3 py-2 text-xs font-mono rounded transition-colors ${sortMode === mode
+                ? "bg-[#f34e0c] text-white"
+                : "text-[var(--color-muted)] hover:bg-[var(--color-rule)] hover:text-[var(--color-ink)]"
                 }`}
             >
               {mode}
