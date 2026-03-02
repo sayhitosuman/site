@@ -1,0 +1,152 @@
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { fetchBrainDumps, BRAIN_DUMP_CATEGORIES } from "../data";
+import { likeBrainDump } from "../api";
+import type { BrainDump } from "../data";
+
+type SortMode = "recent" | "oldest" | "popular" | "unpopular";
+
+export default function BrainDumpPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [dumps, setDumps] = useState<BrainDump[]>([]);
+  const [search, setSearch] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("recent");
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    searchParams.get("category")
+  );
+
+  useEffect(() => {
+    fetchBrainDumps().then(setDumps);
+  }, []);
+
+  const handleCategoryClick = (cat: string) => {
+    if (activeCategory === cat) {
+      setActiveCategory(null);
+      setSearchParams({});
+    } else {
+      setActiveCategory(cat);
+      setSearchParams({ category: cat });
+    }
+  };
+
+  const handleLike = async (id: string) => {
+    try {
+      const res = await likeBrainDump(id);
+      setDumps((prev) =>
+        prev.map((d) =>
+          d.id === id ? { ...d, likes: res.likes } : d
+        )
+      );
+    } catch (e) {
+      console.error("Like failed", e);
+    }
+  };
+
+  const filtered = dumps.filter((d) => {
+    const matchesSearch = (d.title + " " + d.body).toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = activeCategory ? d.category === activeCategory : true;
+    return matchesSearch && matchesCategory;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    switch (sortMode) {
+      case "recent":
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      case "oldest":
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      case "popular":
+        return (b.likes || 0) - (a.likes || 0);
+      case "unpopular":
+        return (a.likes || 0) - (b.likes || 0);
+      default:
+        return 0;
+    }
+  });
+
+  return (
+    <section className="max-w-xl mx-auto">
+      <h1 className="font-serif text-2xl mb-6">Brain Dump</h1>
+
+      <div className="text-[10px] uppercase tracking-widest text-[var(--color-muted)] mb-3">Tags / Moods</div>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="search thoughts..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-4 py-2 bg-transparent border border-[var(--color-rule)] rounded-md text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[#f34e0c]"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-8">
+        {BRAIN_DUMP_CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => handleCategoryClick(cat)}
+            className={`px-3 py-1 text-xs font-mono rounded-full border transition-colors ${activeCategory === cat
+              ? "bg-[#f34e0c] text-white border-[#f34e0c]"
+              : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[#f34e0c] hover:text-[var(--color-ink)]"
+              }`}
+          >
+            {cat}
+          </button>
+        ))}
+        {activeCategory && (
+          <button onClick={() => { setActiveCategory(null); setSearchParams({}); }} className="px-3 py-1 text-xs font-mono text-[var(--color-muted)] hover:text-[#f34e0c] underline">clear</button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 mb-6">
+        <span className="text-xs font-mono text-[var(--color-muted)] mr-1">sort:</span>
+        {(["recent", "oldest", "popular", "unpopular"] as SortMode[]).map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setSortMode(mode)}
+            className={`px-3 py-1 text-xs font-mono rounded-full border transition-colors ${sortMode === mode
+              ? "bg-[#f34e0c] text-white border-[#f34e0c]"
+              : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[#f34e0c] hover:text-[var(--color-ink)]"
+              }`}
+          >
+            {mode}
+          </button>
+        ))}
+      </div>
+
+      {sorted.length === 0 ? (
+        <p className="text-[var(--color-muted)] italic">No thoughts found.</p>
+      ) : (
+        <div className="space-y-4">
+          {sorted.map((d) => (
+            <div key={d.id} className="border border-[var(--color-rule)] rounded-lg p-4 hover:border-[#f34e0c] transition-colors group">
+              {d.category && (
+                <button onClick={() => handleCategoryClick(d.category!)} className="inline-block px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-[var(--color-rule)] text-[var(--color-muted)] rounded mb-3 hover:bg-[#f34e0c] hover:text-white transition-colors">
+                  {d.category}
+                </button>
+              )}
+
+              <Link to={"/brain-dump/" + d.id} className="block group" style={{ textDecoration: 'none' }}>
+                <h3 className="text-lg font-semibold text-[var(--color-ink)] group-hover:text-[#f34e0c] transition-colors leading-tight">
+                  {d.title}
+                </h3>
+              </Link>
+
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--color-rule)]">
+                <span className="text-xs font-mono text-[var(--color-muted)]">
+                  {d.date} {d.time && `· ${d.time}`}
+                </span>
+
+                <button onClick={() => handleLike(d.id)} className="flex items-center gap-1.5 text-xs font-mono text-[var(--color-muted)] hover:text-[#f34e0c] transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  <span>{d.likes || 0}</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
