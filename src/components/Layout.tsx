@@ -25,6 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("greeting");
   const [dark, setDark] = useState(getDarkMode);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const rafRef = useRef<number | null>(null);
 
   // Handle scrollTo state when navigating back to homepage
@@ -104,11 +105,95 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex">
+      {/* Mobile Floating Menu Button - visible only on smaller screens */}
+      <button
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        aria-label="Open mobile menu"
+        className="fixed bottom-8 right-8 z-50 w-11 h-11 flex items-center justify-center lg:hidden transition-all duration-300 cursor-pointer shadow-lg outline-hidden"
+        style={{
+          background: dark ? 'rgba(25, 27, 29, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          border: `1px solid ${dark ? '#333' : '#eee'}`,
+          color: dark ? '#f34e0c' : '#f34e0c',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '0px',
+        }}
+      >
+        {isMenuOpen ? (
+          <span className="text-xl font-light transform transition-transform duration-300">×</span>
+        ) : (
+          <div className="flex flex-col gap-[4px] items-center">
+            <div className="w-4 h-[1px]" style={{ background: dark ? '#f34e0c' : '#f34e0c' }} />
+            <div className="w-4 h-[1px]" style={{ background: dark ? '#f34e0c' : '#f34e0c' }} />
+            <div className="w-4 h-[1px]" style={{ background: dark ? '#f34e0c' : '#f34e0c' }} />
+          </div>
+        )}
+      </button>
+
+      {/* Mobile Menu Content */}
+      <div
+        className={`fixed bottom-24 right-8 z-50 p-6 flex flex-col items-end gap-6 lg:hidden transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] border origin-bottom-right shadow-2xl ${isMenuOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4 pointer-events-none"
+          }`}
+        style={{
+          background: dark ? 'rgba(15, 17, 19, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          borderColor: dark ? '#333' : '#eee',
+          backdropFilter: 'blur(15px)',
+          borderRadius: '0px',
+        }}
+      >
+        {nav.map((n) => (
+          <Link
+            key={n.path}
+            to={n.path}
+            onClick={(e) => {
+              setIsMenuOpen(false);
+              if (isHome && n.sectionId) {
+                e.preventDefault();
+                const el = document.getElementById(n.sectionId);
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              } else if (!isHome && (pathname === n.path || pathname.startsWith(n.path + "/")) && n.path !== "/") {
+                e.preventDefault();
+                navigate("/", { state: { scrollTo: n.sectionId } });
+              }
+            }}
+            className={`text-[13px] tracking-[0.2em] font-mono no-underline uppercase transition-all duration-300 ${isActive(n)
+              ? "!text-[#f34e0c] font-medium underline underline-offset-4 decoration-1"
+              : dark ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black"
+              }`}
+          >
+            {n.label}
+          </Link>
+        ))}
+
+        <div className="h-[1px] w-full mt-2" style={{ background: dark ? '#222' : '#f0f0f0' }} />
+
+        <button
+          onClick={() => {
+            setDark(!dark);
+            setIsMenuOpen(false);
+          }}
+          className="text-[10px] font-mono uppercase tracking-[0.3em] font-semibold py-1 px-2 transition-all flex items-center gap-2"
+          style={{
+            color: dark ? '#fff' : '#000',
+            border: `1px solid ${dark ? '#333' : '#eee'}`,
+          }}
+        >
+          {dark ? 'LIGHT MODE' : 'DARK MODE'}
+        </button>
+      </div>
+
+      {/* Overlay for closing menu */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/5 lg:hidden backdrop-blur-[1px]"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
       {/* Dark mode toggle — top right */}
       <button
         onClick={() => setDark(!dark)}
         aria-label="Toggle dark mode"
-        className="fixed top-6 right-6 z-50 px-2.5 py-1.5 flex items-center justify-center transition-all duration-300 cursor-pointer font-mono text-[11px] tracking-wider uppercase"
+        className="fixed top-6 right-6 z-50 px-2.5 py-1.5 hidden lg:flex items-center justify-center transition-all duration-300 cursor-pointer font-mono text-[11px] tracking-wider uppercase"
         style={{
           background: 'transparent',
           border: `1px solid ${dark ? '#444' : '#ccc'}`,
