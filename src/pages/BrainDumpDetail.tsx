@@ -105,10 +105,7 @@ export default function BrainDumpDetail() {
           </button>
         </div>
       </article>
-
-      <p className="text-xs text-[var(--color-muted)] italic mt-8 text-center">
-        ~end
-      </p>
     </section>
   );
 }
+

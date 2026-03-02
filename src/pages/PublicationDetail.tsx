@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Layout from "../components/Layout";
 import { fetchPublications } from "../data";
 import type { Publication } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
@@ -19,25 +18,25 @@ export default function PublicationDetail() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
-      </Layout>
+      </>
     );
   }
 
   if (!pub) {
     return (
-      <Layout>
+      <>
         <Link to="/publications" className="text-xs text-[var(--color-muted)] no-underline hover:text-[var(--color-ink)]">
           ← back to publications
         </Link>
         <p className="mt-12 text-[var(--color-muted)]">Publication not found.</p>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Link to="/publications" className="text-xs text-[var(--color-muted)] no-underline hover:!text-[var(--color-ink)]">
         ← back to publications
       </Link>
@@ -89,6 +88,7 @@ export default function PublicationDetail() {
           )}
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
+

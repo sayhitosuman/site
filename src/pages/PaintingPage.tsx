@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
-import Layout from "../components/Layout";
 
 export default function PaintingPage() {
   return (
-    <Layout>
+    <>
       <Link to="/" className="text-xs text-[var(--color-muted)] no-underline hover:text-[var(--color-ink)]">
         ← back
       </Link>
@@ -27,6 +26,6 @@ export default function PaintingPage() {
         If you'd like a painting or want to talk about art, just{" "}
         <a href="mailto:hello@suman.dev">say hello</a>.
       </p>
-    </Layout>
+    </>
   );
 }

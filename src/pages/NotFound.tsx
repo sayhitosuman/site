@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import Layout from "../components/Layout";
 
 interface NotFoundProps {
     onSecretUnlock?: () => void;
@@ -20,7 +19,7 @@ export default function NotFound({ onSecretUnlock }: NotFoundProps) {
     };
 
     return (
-        <Layout>
+        <>
             <div
                 className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 select-none cursor-default"
                 onClick={handleClick}
@@ -51,6 +50,7 @@ export default function NotFound({ onSecretUnlock }: NotFoundProps) {
                     </p>
                 )}
             </div>
-        </Layout>
+        </>
     );
 }
+

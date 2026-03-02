@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Layout from "../components/Layout";
 import { fetchProjects } from "../data";
 import type { Project } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
@@ -19,25 +18,25 @@ export default function ProjectDetail() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
-      </Layout>
+      </>
     );
   }
 
   if (!project) {
     return (
-      <Layout>
+      <>
         <Link to="/projects" className="text-xs text-[var(--color-muted)] no-underline hover:text-[var(--color-ink)]">
           ← back to projects
         </Link>
         <p className="mt-12 text-[var(--color-muted)]">Project not found.</p>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Link to="/projects" className="text-xs text-[var(--color-muted)] no-underline hover:!text-[var(--color-ink)]">
         ← back to projects
       </Link>
@@ -107,6 +106,7 @@ export default function ProjectDetail() {
           )}
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
+

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Layout from "../components/Layout";
 import { fetchBlogs } from "../data";
 import type { BlogPost } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
@@ -27,25 +26,25 @@ export default function BlogDetail() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
-      </Layout>
+      </>
     );
   }
 
   if (!post) {
     return (
-      <Layout>
+      <>
         <Link to="/blogs" className="text-xs text-[var(--color-muted)] no-underline hover:text-[var(--color-ink)]">
           ← back to blog
         </Link>
         <p className="mt-12 text-[var(--color-muted)]">Post not found.</p>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Link to="/blogs" className="text-xs text-[var(--color-muted)] no-underline hover:!text-[var(--color-ink)]">
         ← back to blog
       </Link>
@@ -75,6 +74,7 @@ export default function BlogDetail() {
           <MarkdownContent content={post.content} />
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
+
