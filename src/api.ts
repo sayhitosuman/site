@@ -4,7 +4,15 @@
 
 // In development, backend is on localhost:4000
 // In production, change this to your Render URL
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const isLocalStorage = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
+// If we are in production but VITE_API_URL is missing, we are likely hitting the wrong target
+if (!isLocalStorage && !VITE_API_URL) {
+    console.warn("⚠️ Production build detected but VITE_API_URL is missing. Falling back to localhost:4000 which will likely fail.");
+}
+
+const BASE_URL = VITE_API_URL || "http://localhost:4000";
 
 // ── Token management ─────────────────────────────────────────
 let token: string | null = localStorage.getItem("admin_token");
@@ -33,17 +41,32 @@ async function apiFetch<T>(
         headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${BASE_URL}/api${path}`, {
-        ...options,
-        headers,
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/api${path}`, {
+            ...options,
+            headers,
+        });
 
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || res.statusText);
+        if (!res.ok) {
+            if (res.status === 401) {
+                // If we get an unauthorized error, clear the local token
+                // unless we are on the login page
+                if (!path.includes("/auth/login")) {
+                    setToken(null);
+                }
+            }
+            const err = await res.json().catch(() => ({ error: `HTTP ${res.status}: ${res.statusText}` }));
+            throw new Error(err.error || `Server returned HTTP status ${res.status}`);
+        }
+
+        return res.json();
+    } catch (err: any) {
+        // network errors or JSON parse errors
+        if (err.message.includes("Failed to fetch")) {
+            throw new Error(`SERVER_ERROR: Could not connect to the API at ${BASE_URL}. Is the server running?`);
+        }
+        throw err;
     }
-
-    return res.json();
 }
 
 // ── Auth ─────────────────────────────────────────────────────

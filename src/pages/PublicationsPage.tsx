@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchPublications } from "../data";
 import type { Publication } from "../data";
+import { SkeletonList } from "../components/Skeleton";
 
 export default function PublicationsPage() {
   const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchPublications().then(setPublications);
+    fetchPublications()
+      .then(setPublications)
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = publications.filter(
@@ -32,7 +36,9 @@ export default function PublicationsPage() {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <SkeletonList count={5} />
+      ) : filtered.length === 0 ? (
         <p className="text-[var(--color-muted)] italic">No publications found.</p>
       ) : (
         <ul className="space-y-6">

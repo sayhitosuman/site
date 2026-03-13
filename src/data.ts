@@ -94,61 +94,100 @@ export interface Painting {
   likes?: number;
 }
 
-// --- Async fetchers (try API first, fallback to defaults) ---
+// --- Caching Helper ---
+function getCache<T>(key: string): T | null {
+  try {
+    const data = localStorage.getItem(`cache_${key}`);
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCache<T>(key: string, data: T) {
+  try {
+    localStorage.setItem(`cache_${key}`, JSON.stringify(data));
+  } catch (e) {
+    console.warn("Cache save failed", e);
+  }
+}
+
+// --- Async fetchers (try API first, fallback to cache, then defaults) ---
 
 export async function fetchProjects(): Promise<Project[]> {
   try {
-    return await api.getAll<Project>("projects");
-  } catch {
-    return _p;
+    const data = await api.getAll<Project>("projects");
+    setCache("projects", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch projects failed:", err);
+    return getCache<Project[]>("projects") || _p;
   }
 }
 
 export async function fetchPublications(): Promise<Publication[]> {
   try {
-    return await api.getAll<Publication>("publications");
-  } catch {
-    return _pub;
+    const data = await api.getAll<Publication>("publications");
+    setCache("publications", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch publications failed:", err);
+    return getCache<Publication[]>("publications") || _pub;
   }
 }
 
 export async function fetchBlogs(): Promise<BlogPost[]> {
   try {
-    return await api.getAll<BlogPost>("blogs");
-  } catch {
-    return _b;
+    const data = await api.getAll<BlogPost>("blogs");
+    setCache("blogs", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch blogs failed:", err);
+    return getCache<BlogPost[]>("blogs") || _b;
   }
 }
 
 export async function fetchNotes(): Promise<Note[]> {
   try {
-    return await api.getAll<Note>("notes");
-  } catch {
-    return _n;
+    const data = await api.getAll<Note>("notes");
+    setCache("notes", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch notes failed:", err);
+    return getCache<Note[]>("notes") || _n;
   }
 }
 
 export async function fetchBrainDumps(): Promise<BrainDump[]> {
   try {
-    return await api.getAll<BrainDump>("brain-dumps");
-  } catch {
-    return _bd;
+    const data = await api.getAll<BrainDump>("brain-dumps");
+    setCache("brain-dumps", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch brain-dumps failed:", err);
+    return getCache<BrainDump[]>("brain-dumps") || _bd;
   }
 }
 
 export async function fetchPaintings(): Promise<Painting[]> {
   try {
-    return await api.getAll<Painting>("paintings");
-  } catch {
-    return [];
+    const data = await api.getAll<Painting>("paintings");
+    setCache("paintings", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch paintings failed:", err);
+    return getCache<Painting[]>("paintings") || [];
   }
 }
 
 export async function fetchSocials(): Promise<Social[]> {
   try {
-    return await api.getAll<Social>("contacts");
-  } catch {
-    return _s;
+    const data = await api.getAll<Social>("contacts");
+    setCache("contacts", data);
+    return data;
+  } catch (err) {
+    console.error("Fetch socials failed:", err);
+    return getCache<Social[]>("contacts") || _s;
   }
 }
 

@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchBlogs } from "../data";
 import type { BlogPost } from "../data";
+import { SkeletonList } from "../components/Skeleton";
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchBlogs().then(setBlogs);
+    fetchBlogs()
+      .then(setBlogs)
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = blogs.filter(
@@ -32,7 +36,9 @@ export default function BlogsPage() {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <SkeletonList count={5} />
+      ) : filtered.length === 0 ? (
         <p className="text-[var(--color-muted)] italic">No blogs found.</p>
       ) : (
         <ul className="space-y-6">

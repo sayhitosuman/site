@@ -42,11 +42,18 @@ export default function Dashboard() {
   return (
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 700, color: "#fff", marginBottom: 4, letterSpacing: "-0.02em" }}>Dashboard</h1>
-      <p style={{ fontSize: 12, color: "#555", marginBottom: 32 }}>All content for suman.dev — stored in MongoDB via the API.</p>
+      <p style={{ fontSize: 12, color: "#555", marginBottom: 32 }}>All content for suman.dev — managed via the Turso API.</p>
 
       {error && (
-        <div style={{ color: "#c05050", fontSize: 12, marginBottom: 16, background: "#1a1111", padding: "0.6rem 1rem", borderRadius: 4, border: "1px solid #3a1818" }}>
-          ⚠ API Error: {error}. Make sure the server is running on port 4000.
+        <div style={{ color: "#fca5a5", fontSize: 13, marginBottom: 24, background: "rgba(239, 68, 68, 0.1)", padding: "1rem", borderRadius: 8, border: "1px solid rgba(239, 68, 68, 0.2)", display: "flex", alignItems: "start", gap: 10 }}>
+          <span style={{ fontSize: 16 }}>⚠</span>
+          <div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>API Error: {error}</div>
+            <div style={{ fontSize: 11, opacity: 0.8 }}>
+              If you see a 401 error, your admin session might have expired. Try logging out and back in.
+              Also ensure the backend server environment variables (JWT_SECRET, etc.) are correctly set.
+            </div>
+          </div>
         </div>
       )}
 
@@ -70,7 +77,7 @@ export default function Dashboard() {
 
       <div style={{ background: "#13151c", border: "1px solid #1f2230", borderRadius: 6, padding: "1.4rem 1.6rem", fontSize: 12, color: "#555", lineHeight: 1.9 }}>
         <div style={{ color: "#888", marginBottom: 8, fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" }}>How this works</div>
-        Data is stored in <code style={{ color: "#f34e0c", background: "#0d0f14", padding: "1px 5px", borderRadius: 3 }}>MongoDB Atlas</code> and
+        Data is stored in <code style={{ color: "#f34e0c", background: "#0d0f14", padding: "1px 5px", borderRadius: 3 }}>Turso (SQLite)</code> and
         files are uploaded to <code style={{ color: "#f34e0c", background: "#0d0f14", padding: "1px 5px", borderRadius: 3 }}>Cloudinary</code>.
         The backend runs on <code style={{ color: "#f34e0c", background: "#0d0f14", padding: "1px 5px", borderRadius: 3 }}>Express.js</code> and
         all changes are persisted instantly via the API.

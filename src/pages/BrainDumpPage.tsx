@@ -3,12 +3,14 @@ import { Link, useSearchParams } from "react-router-dom";
 import { fetchBrainDumps, BRAIN_DUMP_CATEGORIES } from "../data";
 import { toggleLikeCount } from "../api";
 import type { BrainDump } from "../data";
+import { SkeletonCard } from "../components/Skeleton";
 
 type SortMode = "recent" | "oldest" | "popular" | "unpopular";
 
 export default function BrainDumpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [dumps, setDumps] = useState<BrainDump[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [activeCategory, setActiveCategory] = useState<string | null>(
@@ -18,7 +20,9 @@ export default function BrainDumpPage() {
   const [showSort, setShowSort] = useState(false);
 
   useEffect(() => {
-    fetchBrainDumps().then(setDumps);
+    fetchBrainDumps()
+      .then(setDumps)
+      .finally(() => setLoading(false));
   }, []);
 
   const handleCategoryClick = (cat: string) => {
@@ -146,7 +150,13 @@ export default function BrainDumpPage() {
         </div>
       )}
 
-      {sorted.length === 0 ? (
+      {loading ? (
+        <div className="space-y-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : sorted.length === 0 ? (
         <p className="text-[var(--color-muted)] italic">No thoughts found.</p>
       ) : (
         <div className="space-y-4">

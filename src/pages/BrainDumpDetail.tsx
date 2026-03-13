@@ -4,6 +4,7 @@ import { fetchBrainDumps } from "../data";
 import { toggleLikeCount } from "../api";
 import type { BrainDump } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
+import { SkeletonLine } from "../components/Skeleton";
 
 export default function BrainDumpDetail() {
   const { id } = useParams();
@@ -35,8 +36,19 @@ export default function BrainDumpDetail() {
 
   if (loading) {
     return (
-      <section className="max-w-xl mx-auto text-center py-20">
-        <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
+      <section className="max-w-xl mx-auto">
+        <SkeletonLine width="120px" height="12px" margin="0 0 32px 0" />
+        <div className="border border-[var(--color-rule)] rounded-lg p-8">
+          <SkeletonLine width="60px" height="20px" margin="0 0 16px 0" />
+          <SkeletonLine width="80%" height="32px" margin="0 0 32px 0" />
+          <SkeletonLine width="100%" height="16px" margin="0 0 8px 0" />
+          <SkeletonLine width="95%" height="16px" margin="0 0 8px 0" />
+          <SkeletonLine width="90%" height="16px" margin="0 0 8px 0" />
+          <div className="mt-10 pt-6 border-t border-[var(--color-rule)] flex justify-between">
+            <SkeletonLine width="100px" height="12px" margin="0" />
+            <SkeletonLine width="40px" height="12px" margin="0" />
+          </div>
+        </div>
       </section>
     );
   }

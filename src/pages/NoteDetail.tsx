@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { fetchNotes } from "../data";
 import type { Note } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
+import { SkeletonLine } from "../components/Skeleton";
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", {
@@ -26,9 +27,15 @@ export default function NoteDetail() {
 
   if (loading) {
     return (
-      <>
-        <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
-      </>
+      <div className="animate-in fade-in duration-500 max-w-xl mx-auto">
+        <SkeletonLine width="100px" height="12px" margin="0 0 32px 0" />
+        <SkeletonLine width="120px" height="10px" margin="0 0 16px 0" />
+        <SkeletonLine width="80%" height="28px" margin="0 0 40px 0" />
+        <div className="w-full h-[1px] bg-[var(--color-rule)] mb-8 opacity-30" />
+        <SkeletonLine width="100%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="95%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="90%" height="16px" margin="0 0 8px 0" />
+      </div>
     );
   }
 

@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { fetchProjects } from "../data";
 import type { Project } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
+import { SkeletonLine } from "../components/Skeleton";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,9 +19,19 @@ export default function ProjectDetail() {
 
   if (loading) {
     return (
-      <>
-        <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
-      </>
+      <div className="animate-in fade-in duration-500">
+        <SkeletonLine width="100px" height="12px" margin="0 0 32px 0" />
+        <SkeletonLine width="60%" height="32px" margin="0 0 24px 0" />
+        <div className="aspect-video w-full bg-[var(--color-rule)] animate-pulse rounded-lg opacity-20 mb-8" />
+        <SkeletonLine width="90%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="85%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="70%" height="16px" margin="0 0 40px 0" />
+        <div className="flex gap-2">
+          <div className="w-16 h-8 bg-[var(--color-rule)] animate-pulse rounded opacity-20" />
+          <div className="w-16 h-8 bg-[var(--color-rule)] animate-pulse rounded opacity-20" />
+          <div className="w-16 h-8 bg-[var(--color-rule)] animate-pulse rounded opacity-20" />
+        </div>
+      </div>
     );
   }
 

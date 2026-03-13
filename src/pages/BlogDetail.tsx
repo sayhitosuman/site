@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { fetchBlogs } from "../data";
 import type { BlogPost } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
+import { SkeletonLine } from "../components/Skeleton";
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", {
@@ -26,9 +27,17 @@ export default function BlogDetail() {
 
   if (loading) {
     return (
-      <>
-        <p className="text-[var(--color-muted)] animate-pulse">Loading…</p>
-      </>
+      <div className="animate-in fade-in duration-500 max-w-2xl mx-auto">
+        <SkeletonLine width="80px" height="12px" margin="0 0 32px 0" />
+        <SkeletonLine width="85%" height="36px" margin="0 0 12px 0" />
+        <SkeletonLine width="200px" height="12px" margin="0 0 40px 0" />
+        <div className="w-full h-[1px] bg-[var(--color-rule)] mb-8 opacity-30" />
+        <div className="aspect-[16/9] w-full bg-[var(--color-rule)] animate-pulse rounded-lg opacity-20 mb-10" />
+        <SkeletonLine width="100%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="95%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="98%" height="16px" margin="0 0 8px 0" />
+        <SkeletonLine width="90%" height="16px" margin="0 0 8px 0" />
+      </div>
     );
   }
 

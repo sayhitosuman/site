@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchNotes } from "../data";
 import type { Note } from "../data";
+import { SkeletonList } from "../components/Skeleton";
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchNotes().then(setNotes);
+    fetchNotes()
+      .then(setNotes)
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = notes.filter(
@@ -32,7 +36,9 @@ export default function NotesPage() {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <SkeletonList count={5} />
+      ) : filtered.length === 0 ? (
         <p className="text-[var(--color-muted)] italic">No notes found.</p>
       ) : (
         <ul className="space-y-6">

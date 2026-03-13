@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchProjects, fetchPublications, fetchBlogs, fetchNotes, fetchBrainDumps } from "../data";
 import type { Project, Publication, BlogPost, Note, BrainDump } from "../data";
+import { SkeletonList, SkeletonCard } from "../components/Skeleton";
 
 function Divider() {
   return <hr className="border-[var(--color-rule)] my-14" />;
@@ -16,18 +17,35 @@ function SectionLink({ to, children }: { to: string; children: React.ReactNode }
 }
 
 export default function Home() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [brainDumps, setBrainDumps] = useState<BrainDump[]>([]);
+  const [projects, setProjects] = useState<Project[] | null>(null);
+  const [publications, setPublications] = useState<Publication[] | null>(null);
+  const [blogs, setBlogs] = useState<BlogPost[] | null>(null);
+  const [notes, setNotes] = useState<Note[] | null>(null);
+  const [brainDumps, setBrainDumps] = useState<BrainDump[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProjects().then(setProjects);
-    fetchPublications().then(setPublications);
-    fetchBlogs().then(setBlogs);
-    fetchNotes().then(setNotes);
-    fetchBrainDumps().then(setBrainDumps);
+    const loadData = async () => {
+      try {
+        // Fetch everything in parallel
+        const [p, pub, b, n, bd] = await Promise.all([
+          fetchProjects(),
+          fetchPublications(),
+          fetchBlogs(),
+          fetchNotes(),
+          fetchBrainDumps(),
+        ]);
+        setProjects(p);
+        setPublications(pub);
+        setBlogs(b);
+        setNotes(n);
+        setBrainDumps(bd);
+      } catch (err: any) {
+        console.error("Home loading error:", err);
+        setError(err.message);
+      }
+    };
+    loadData();
   }, []);
 
   return (
@@ -36,7 +54,6 @@ export default function Home() {
       <section id="greeting">
         <h1 className="font-[var(--font-serif)] text-3xl md:text-4xl font-normal leading-tight italic">
           Hello, I'm Suman Mandal🙏
-
         </h1>
         <div className="mt-6 text-base leading-relaxed text-[var(--color-muted)] space-y-4">
           <p>
@@ -53,6 +70,12 @@ export default function Home() {
         </div>
       </section>
 
+      {error && (
+        <div className="mt-8 p-4 bg-red-900/10 border border-red-900/20 rounded text-red-500 text-sm">
+          ⚠ Could not sync latest data. Some content might be slightly outdated.
+        </div>
+      )}
+
       <Divider />
 
       {/* 2. Projects */}
@@ -60,26 +83,30 @@ export default function Home() {
         <p className="text-base leading-relaxed mb-8">
           Along the way, I've built a few things I'm proud of.
         </p>
-        <ol className="list-none space-y-6">
-          {projects.slice(0, 3).map((p, i) => (
-            <li key={p.id} className="flex gap-4">
-              <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0 mt-1">{i + 1}.</span>
-              <div className="flex gap-4 flex-1">
-                {p.imageUrl && (
-                  <img src={p.imageUrl} alt="" className="w-16 h-12 rounded object-cover border border-[var(--color-rule)] shrink-0 hidden sm:block" />
-                )}
-                <div>
-                  <Link to={"/projects/" + p.id} className="text-base font-medium">
-                    {p.title}
-                  </Link>
-                  <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
-                    {p.description}
-                  </p>
+        {!projects ? (
+          <SkeletonList count={3} />
+        ) : (
+          <ol className="list-none space-y-6">
+            {projects.slice(0, 3).map((p, i) => (
+              <li key={p.id} className="flex gap-4">
+                <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0 mt-1">{i + 1}.</span>
+                <div className="flex gap-4 flex-1">
+                  {p.imageUrl && (
+                    <img src={p.imageUrl} alt="" className="w-16 h-12 rounded object-cover border border-[var(--color-rule)] shrink-0 hidden sm:block" />
+                  )}
+                  <div>
+                    <Link to={"/projects/" + p.id} className="text-base font-medium">
+                      {p.title}
+                    </Link>
+                    <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
+                      {p.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        )}
         <SectionLink to="/projects">all projects</SectionLink>
       </section>
 
@@ -90,26 +117,30 @@ export default function Home() {
         <p className="text-base leading-relaxed mb-8">
           I also write — long-form, when the thought demands it.
         </p>
-        <ol className="list-none space-y-6">
-          {blogs.slice(0, 3).map((b, i) => (
-            <li key={b.id} className="flex gap-4">
-              <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0 mt-1">{i + 1}.</span>
-              <div className="flex gap-4 flex-1">
-                {b.imageUrl && (
-                  <img src={b.imageUrl} alt="" className="w-16 h-12 rounded object-cover border border-[var(--color-rule)] shrink-0 hidden sm:block" />
-                )}
-                <div>
-                  <Link to={"/blogs/" + b.id} className="text-base font-medium">
-                    {b.title}
-                  </Link>
-                  <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
-                    {b.excerpt}
-                  </p>
+        {!blogs ? (
+          <SkeletonList count={3} />
+        ) : (
+          <ol className="list-none space-y-6">
+            {blogs.slice(0, 3).map((b, i) => (
+              <li key={b.id} className="flex gap-4">
+                <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0 mt-1">{i + 1}.</span>
+                <div className="flex gap-4 flex-1">
+                  {b.imageUrl && (
+                    <img src={b.imageUrl} alt="" className="w-16 h-12 rounded object-cover border border-[var(--color-rule)] shrink-0 hidden sm:block" />
+                  )}
+                  <div>
+                    <Link to={"/blogs/" + b.id} className="text-base font-medium">
+                      {b.title}
+                    </Link>
+                    <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
+                      {b.excerpt}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        )}
         <SectionLink to="/blogs">all blogs</SectionLink>
       </section>
 
@@ -120,21 +151,25 @@ export default function Home() {
         <p className="text-base leading-relaxed mb-8">
           Some of this work has found its way into publications.
         </p>
-        <ol className="list-none space-y-6">
-          {publications.slice(0, 3).map((p, i) => (
-            <li key={p.id} className="flex gap-3">
-              <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0">{i + 1}.</span>
-              <div>
-                <Link to={"/publications/" + p.id} className="text-base font-medium">
-                  {p.title}
-                </Link>
-                <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
-                  {p.description}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        {!publications ? (
+          <SkeletonList count={2} />
+        ) : (
+          <ol className="list-none space-y-6">
+            {publications.slice(0, 3).map((p, i) => (
+              <li key={p.id} className="flex gap-3">
+                <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0">{i + 1}.</span>
+                <div>
+                  <Link to={"/publications/" + p.id} className="text-base font-medium">
+                    {p.title}
+                  </Link>
+                  <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
+                    {p.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
         <SectionLink to="/publications">all publications</SectionLink>
       </section>
 
@@ -145,21 +180,25 @@ export default function Home() {
         <p className="text-base leading-relaxed mb-8">
           Notes — less polished, more honest. These are opinions, not facts.
         </p>
-        <ol className="list-none space-y-6">
-          {notes.slice(0, 3).map((n, i) => (
-            <li key={n.id} className="flex gap-3">
-              <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0">{i + 1}.</span>
-              <div>
-                <Link to={"/notes/" + n.id} className="text-base font-medium">
-                  {n.title}
-                </Link>
-                <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
-                  {n.content}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        {!notes ? (
+          <SkeletonList count={2} />
+        ) : (
+          <ol className="list-none space-y-6">
+            {notes.slice(0, 3).map((n, i) => (
+              <li key={n.id} className="flex gap-3">
+                <span className="text-[var(--color-muted)] text-sm font-mono w-5 shrink-0">{i + 1}.</span>
+                <div>
+                  <Link to={"/notes/" + n.id} className="text-base font-medium">
+                    {n.title}
+                  </Link>
+                  <p className="mt-1 text-sm text-[var(--color-muted)] leading-relaxed">
+                    {n.content}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
         <SectionLink to="/notes">all notes</SectionLink>
       </section>
 
@@ -170,45 +209,52 @@ export default function Home() {
         <p className="text-base leading-relaxed mb-6">
           Brain Dump — fleeting thoughts, barely edited.
         </p>
-        <div className="space-y-4 mb-6">
-          {brainDumps.slice(0, 3).map((bd) => (
-            <div
-              key={bd.id}
-              className="border border-[var(--color-rule)] rounded-lg p-4 hover:border-[#f34e0c] transition-colors group"
-            >
-              {/* Category tag */}
-              {bd.category && (
+        {!brainDumps ? (
+          <div className="space-y-4 mb-6">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : (
+          <div className="space-y-4 mb-6">
+            {brainDumps.slice(0, 3).map((bd) => (
+              <div
+                key={bd.id}
+                className="border border-[var(--color-rule)] rounded-lg p-4 hover:border-[#f34e0c] transition-colors group"
+              >
+                {/* Category tag */}
+                {bd.category && (
+                  <Link
+                    to={`/brain-dump?category=${bd.category}`}
+                    className="inline-block px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-[var(--color-rule)] text-[var(--color-muted)] rounded mb-3 hover:bg-[#f34e0c] hover:text-white transition-colors"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    {bd.category}
+                  </Link>
+                )}
+
+                {/* Title */}
                 <Link
-                  to={`/brain-dump?category=${bd.category}`}
-                  className="inline-block px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-[var(--color-rule)] text-[var(--color-muted)] rounded mb-3 hover:bg-[#f34e0c] hover:text-white transition-colors"
+                  to={"/brain-dump/" + bd.id}
                   style={{ textDecoration: 'none' }}
                 >
-                  {bd.category}
+                  <h3 className="text-base font-medium text-[var(--color-ink)] group-hover:text-[#f34e0c] transition-colors">
+                    {bd.title}
+                  </h3>
                 </Link>
-              )}
-
-              {/* Title */}
-              <Link
-                to={"/brain-dump/" + bd.id}
-                style={{ textDecoration: 'none' }}
-              >
-                <h3 className="text-base font-medium text-[var(--color-ink)] group-hover:text-[#f34e0c] transition-colors">
-                  {bd.title}
-                </h3>
-              </Link>
-              {/* Footer */}
-              <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--color-rule)]">
-                <span className="text-xs text-[var(--color-muted)] font-mono">{bd.date}</span>
-                <span className="text-xs text-[var(--color-muted)] font-mono flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                  {bd.likes || 0}
-                </span>
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--color-rule)]">
+                  <span className="text-xs text-[var(--color-muted)] font-mono">{bd.date}</span>
+                  <span className="text-xs text-[var(--color-muted)] font-mono flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    {bd.likes || 0}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         <SectionLink to="/brain-dump">all brain dumps</SectionLink>
       </section>
 
@@ -249,3 +295,4 @@ export default function Home() {
     </>
   );
 }
+
