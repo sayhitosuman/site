@@ -45,20 +45,37 @@ export default function Dashboard() {
       <p style={{ fontSize: 12, color: "#555", marginBottom: 32 }}>All content for suman.dev — managed via the Turso API.</p>
 
       {error && (
-        <div style={{ color: "#fca5a5", fontSize: 13, marginBottom: 24, background: "rgba(239, 68, 68, 0.1)", padding: "1rem", borderRadius: 8, border: "1px solid rgba(239, 68, 68, 0.2)", display: "flex", alignItems: "start", gap: 10 }}>
-          <span style={{ fontSize: 16 }}>⚠</span>
+        <div style={{ color: "#fca5a5", fontSize: 13, marginBottom: 24, background: "rgba(239, 68, 68, 0.1)", padding: "1.5rem", borderRadius: 8, border: "1px solid rgba(239, 68, 68, 0.2)", display: "flex", alignItems: "start", gap: 14 }}>
+          <span style={{ fontSize: 20 }}>⚠</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>API Error: {error}</div>
-            <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 12 }}>
-              If you see a 401 error, your admin session might have expired. Try logging out and back in.
-              Also ensure the backend server environment variables (JWT_SECRET, etc.) are correctly set.
+            <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Connection or Authentication Error</div>
+            <div style={{ color: "#fca5a5", fontFamily: "monospace", fontSize: 11, marginBottom: 12, padding: "8px", background: "rgba(0,0,0,0.2)", borderRadius: 4 }}>
+              {error}
             </div>
-            <button
-              onClick={() => { localStorage.clear(); window.location.reload(); }}
-              style={{ background: "#441111", border: "1px solid #662222", color: "#fca5a5", padding: "4px 10px", borderRadius: 4, fontSize: 10, cursor: "pointer" }}
-            >
-              Nuclear Option: Clear Session & Cache
-            </button>
+
+            <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 16, lineHeight: 1.6 }}>
+              <strong>Possible fixes:</strong>
+              <ul style={{ margin: "8px 0", paddingLeft: "1.2rem" }}>
+                <li>Confirm <strong>ADMIN_PASSWORD</strong>, <strong>JWT_SECRET</strong>, <strong>TURSO_URL</strong>, and <strong>TURSO_AUTH_TOKEN</strong> are set in your Render.com Environment Variables.</li>
+                <li>Check your <a href="https://sayhitosuman-api.onrender.com/api/health" target="_blank" rel="noreferrer" style={{ color: "#f34e0c" }}>API Health Status</a> — it should say "ok".</li>
+                <li>Try logging out and back in manually.</li>
+              </ul>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => { localStorage.clear(); window.location.reload(); }}
+                style={{ background: "#f34e0c", border: "none", color: "#fff", padding: "6px 14px", borderRadius: 4, fontSize: 11, cursor: "pointer", fontWeight: 600 }}
+              >
+                Clear All & Restart Session
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                style={{ background: "#2a2d38", border: "none", color: "#ccc", padding: "6px 14px", borderRadius: 4, fontSize: 11, cursor: "pointer" }}
+              >
+                Retry Connection
+              </button>
+            </div>
           </div>
         </div>
       )}
