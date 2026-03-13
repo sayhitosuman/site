@@ -372,7 +372,11 @@ app.get("/api/health", async (req, res) => {
 });
 
 // ── Start server ─────────────────────────────────────────────
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`✨ Turso DB: ${process.env.TURSO_URL}`);
-});
+if (process.env.NODE_ENV !== "production") {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`✨ Turso DB: ${process.env.TURSO_URL}`);
+    });
+}
+
+export default app;
