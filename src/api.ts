@@ -3,11 +3,11 @@
 // ============================================================
 
 // In development, backend is on localhost:4000
-// In production, change this to your Render URL
+// In production, use the Vercel backend
 const isLocalStorage = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const VITE_API_URL = (import.meta as any).env.VITE_API_URL;
 
-// New faster Vercel backend
+// Vercel backend
 const PROD_API_URL = "https://sayhitosuman.vercel.app";
 const BASE_URL = VITE_API_URL || (isLocalStorage ? "http://localhost:4000" : PROD_API_URL);
 
