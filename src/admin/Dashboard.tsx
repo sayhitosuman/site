@@ -47,12 +47,18 @@ export default function Dashboard() {
       {error && (
         <div style={{ color: "#fca5a5", fontSize: 13, marginBottom: 24, background: "rgba(239, 68, 68, 0.1)", padding: "1rem", borderRadius: 8, border: "1px solid rgba(239, 68, 68, 0.2)", display: "flex", alignItems: "start", gap: 10 }}>
           <span style={{ fontSize: 16 }}>⚠</span>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>API Error: {error}</div>
-            <div style={{ fontSize: 11, opacity: 0.8 }}>
+            <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 12 }}>
               If you see a 401 error, your admin session might have expired. Try logging out and back in.
               Also ensure the backend server environment variables (JWT_SECRET, etc.) are correctly set.
             </div>
+            <button
+              onClick={() => { localStorage.clear(); window.location.reload(); }}
+              style={{ background: "#441111", border: "1px solid #662222", color: "#fca5a5", padding: "4px 10px", borderRadius: 4, fontSize: 10, cursor: "pointer" }}
+            >
+              Nuclear Option: Clear Session & Cache
+            </button>
           </div>
         </div>
       )}
