@@ -56,9 +56,9 @@ export default function Dashboard() {
             <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 16, lineHeight: 1.6 }}>
               <strong>Possible fixes:</strong>
               <ul style={{ margin: "8px 0", paddingLeft: "1.2rem" }}>
-                <li>Confirm <strong>ADMIN_PASSWORD</strong>, <strong>JWT_SECRET</strong>, <strong>TURSO_URL</strong>, and <strong>TURSO_AUTH_TOKEN</strong> are set in your Render.com Environment Variables.</li>
-                <li>Check your <a href="https://sayhitosuman-api.onrender.com/api/health" target="_blank" rel="noreferrer" style={{ color: "#f34e0c" }}>API Health Status</a> — it should say "ok".</li>
-                <li>Try logging out and back in manually.</li>
+                <li>Confirm <strong>ADMIN_PASSWORD</strong>, <strong>JWT_SECRET</strong>, <strong>TURSO_URL</strong>, and <strong>TURSO_AUTH_TOKEN</strong> are set in your <strong>Vercel</strong> Environment Variables.</li>
+                <li>Check your <a href="https://sayhitosuman.vercel.app/api/health" target="_blank" rel="noreferrer" style={{ color: "#f34e0c" }}>API Health Status</a> — it should say "ok".</li>
+                <li>Click the red button below to reset your session and log in fresh.</li>
               </ul>
             </div>
 
