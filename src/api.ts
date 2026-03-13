@@ -8,8 +8,8 @@ const isLocalStorage = window.location.hostname === "localhost" || window.locati
 const isProduction = window.location.hostname.endsWith("pages.dev");
 const VITE_API_URL = (import.meta as any).env.VITE_API_URL;
 
-// If we are in production but VITE_API_URL is missing, we fallback to the known Render URL
-const PROD_API_URL = "https://sayhitosuman-api.onrender.com";
+// New faster Vercel backend
+const PROD_API_URL = "https://sayhitosuman.vercel.app";
 const BASE_URL = VITE_API_URL || (isProduction ? PROD_API_URL : "http://localhost:4000");
 
 if (!isLocalStorage && !VITE_API_URL) {
