@@ -5,7 +5,7 @@ const nav = [
   { path: "/", label: "~", sectionId: "greeting" },
   { path: "/projects", label: "projects", sectionId: "projects" },
   { path: "/blogs", label: "blogs", sectionId: "blogs" },
-  { path: "/publications", label: "pubs", sectionId: "publications" },
+  { path: "/publications", label: "resources", sectionId: "publications" },
   { path: "/notes", label: "notes", sectionId: "notes" },
   { path: "/brain-dump", label: "brain-dump", sectionId: "brain-dump" },
   { path: "/contact", label: "contact", sectionId: "contact" },

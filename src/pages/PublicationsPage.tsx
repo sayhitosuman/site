@@ -23,13 +23,13 @@ export default function PublicationsPage() {
 
   return (
     <section className="max-w-xl mx-auto">
-      <h1 className="font-serif text-2xl mb-6">Publications</h1>
+      <h1 className="font-serif text-2xl mb-6">Resources & Tutorials</h1>
 
       {/* Search */}
       <div className="mb-8">
         <input
           type="text"
-          placeholder="search publications..."
+          placeholder="search resources..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full px-4 py-2 bg-transparent border border-[var(--color-rule)] rounded-md text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[#3a5f73]"
@@ -39,7 +39,7 @@ export default function PublicationsPage() {
       {loading ? (
         <SkeletonList count={5} />
       ) : filtered.length === 0 ? (
-        <p className="text-[var(--color-muted)] italic">No publications found.</p>
+        <p className="text-[var(--color-muted)] italic">No resources found.</p>
       ) : (
         <ul className="space-y-6">
           {filtered.map((p, i) => (

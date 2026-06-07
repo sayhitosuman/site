@@ -70,6 +70,7 @@ async function initDB() {
                 title TEXT NOT NULL,
                 description TEXT DEFAULT '',
                 abstract TEXT DEFAULT '',
+                content TEXT DEFAULT '',
                 journal TEXT DEFAULT '',
                 year INTEGER DEFAULT 2024,
                 doi TEXT DEFAULT '',
@@ -139,6 +140,13 @@ async function initDB() {
         if (!columns.includes("body")) {
             await db.execute("ALTER TABLE brain_dumps ADD COLUMN body TEXT DEFAULT ''");
             console.log("🛠️ Added 'body' column to brain_dumps");
+        }
+
+        const pubInfo = await db.execute("PRAGMA table_info(publications)");
+        const pubCols = pubInfo.rows.map(r => r.name);
+        if (!pubCols.includes("content")) {
+            await db.execute("ALTER TABLE publications ADD COLUMN content TEXT DEFAULT ''");
+            console.log("🛠️ Added 'content' column to publications");
         }
 
         console.log("✅ Turso Database initialized");

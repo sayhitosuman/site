@@ -76,6 +76,15 @@ export default function PublicationDetail() {
           </div>
         </div>
 
+        {pub.content && pub.content.trim().length > 0 && (
+          <>
+            <hr className="border-[var(--color-rule)] my-8" />
+            <div className="text-base leading-loose text-[var(--color-ink)]">
+              <MarkdownContent content={pub.content} />
+            </div>
+          </>
+        )}
+
         <div className="mt-10 space-y-3 pt-6 border-t border-[var(--color-rule)]">
           {pub.doi && (
             <div className="flex items-center gap-3">

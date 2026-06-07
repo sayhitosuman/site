@@ -6,7 +6,7 @@ const nav = [
   { to: "/backend", label: "⌂ Dashboard", end: true },
   { to: "/backend/projects", label: "◈ Projects" },
   { to: "/backend/blogs", label: "✎ Blogs" },
-  { to: "/backend/publications", label: "◉ Publications" },
+  { to: "/backend/publications", label: "◉ Resources/Tutorials" },
   { to: "/backend/notes", label: "◇ Notes" },
   { to: "/backend/brain-dumps", label: "⚡ Brain Dumps" },
   { to: "/backend/paintings", label: "🎨 Paintings" },

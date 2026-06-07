@@ -33,7 +33,7 @@ export default function Dashboard() {
   const cards = [
     { to: "/backend/projects", num: counts.p, label: "Projects", hint: "add / edit projects" },
     { to: "/backend/blogs", num: counts.b, label: "Blogs", hint: "long-form writing" },
-    { to: "/backend/publications", num: counts.pub, label: "Publications", hint: "research papers" },
+    { to: "/backend/publications", num: counts.pub, label: "Resources", hint: "tutorials, guides" },
     { to: "/backend/notes", num: counts.n, label: "Notes", hint: "opinion pieces" },
     { to: "/backend/brain-dumps", num: counts.bd, label: "Brain Dumps", hint: "micro-thoughts" },
     { to: "/backend/contacts", num: counts.c, label: "Contacts", hint: "social links" },

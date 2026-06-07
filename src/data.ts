@@ -32,6 +32,7 @@ export interface Publication {
   title: string;
   description: string;
   abstract?: string;
+  content?: string;
   journal?: string;
   year: number;
   doi?: string;

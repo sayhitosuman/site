@@ -149,7 +149,7 @@ export default function Home() {
       {/* 4. Publications */}
       <section id="publications">
         <p className="text-base leading-relaxed mb-8">
-          Some of this work has found its way into publications.
+          I want to add course material resources to help others, guides, or anything lecture type things.
         </p>
         {!publications ? (
           <SkeletonList count={2} />
@@ -170,7 +170,7 @@ export default function Home() {
             ))}
           </ol>
         )}
-        <SectionLink to="/publications">all publications</SectionLink>
+        <SectionLink to="/publications">all resources</SectionLink>
       </section>
 
       <Divider />

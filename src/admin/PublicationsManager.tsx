@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { store, genId } from "./store";
 import type { Publication } from "./store";
 import MediaUploader from "./MediaUploader";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const c = {
   h1: { fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 4 } as React.CSSProperties,
@@ -24,10 +28,10 @@ const c = {
   error: { color: "#c05050", fontSize: 12, marginBottom: 16, background: "#1a1111", padding: "0.5rem 0.8rem", borderRadius: 4, border: "1px solid #3a1818" } as React.CSSProperties,
 };
 
-type FormState = { id: string; title: string; description: string; abstract: string; journal: string; year: string; doi: string; link: string; authors: string };
-const blankForm = (): FormState => ({ id: genId(), title: "", description: "", abstract: "", journal: "", year: String(new Date().getFullYear()), doi: "", link: "", authors: "" });
+type FormState = { id: string; title: string; description: string; abstract: string; content: string; journal: string; year: string; doi: string; link: string; authors: string };
+const blankForm = (): FormState => ({ id: genId(), title: "", description: "", abstract: "", content: "", journal: "", year: String(new Date().getFullYear()), doi: "", link: "", authors: "" });
 const toItem = (f: FormState): Publication => ({ ...f, year: Number(f.year) || new Date().getFullYear(), authors: f.authors.split(",").map(s => s.trim()).filter(Boolean) });
-const toForm = (p: Publication): FormState => ({ id: p.id, title: p.title, description: p.description, abstract: p.abstract ?? "", journal: p.journal ?? "", year: String(p.year), doi: p.doi ?? "", link: p.link ?? "", authors: (p.authors ?? []).join(", ") });
+const toForm = (p: Publication): FormState => ({ id: p.id, title: p.title, description: p.description, abstract: p.abstract ?? "", content: p.content ?? "", journal: p.journal ?? "", year: String(p.year), doi: p.doi ?? "", link: p.link ?? "", authors: (p.authors ?? []).join(", ") });
 
 export default function PublicationsManager() {
   const [items, setItems] = useState<Publication[]>([]);
@@ -64,7 +68,7 @@ export default function PublicationsManager() {
   };
 
   const del = async (id: string) => {
-    if (!window.confirm("Delete this publication?")) return;
+    if (!window.confirm("Delete this resource?")) return;
     try {
       await store.deletePublication(id);
       setItems(prev => prev.filter(i => i.id !== id));
@@ -75,28 +79,66 @@ export default function PublicationsManager() {
 
   return (
     <div>
-      <div style={c.h1}>Publications</div>
-      <div style={c.sub}>{items.length} papers</div>
+      <div style={c.h1}>Resources & Tutorials</div>
+      <div style={c.sub}>{items.length} items</div>
 
       {error && <div style={c.error}>⚠ {error}</div>}
 
-      {mode === "idle" && <button style={c.btnAdd} onClick={startAdd}>+ Add Publication</button>}
+      {mode === "idle" && <button style={c.btnAdd} onClick={startAdd}>+ Add Resource</button>}
 
       {mode !== "idle" && (
         <div style={c.form}>
           <div style={{ fontSize: 13, color: "#f34e0c", marginBottom: 16, fontWeight: 600 }}>
-            {mode === "add" ? "New Publication" : "Edit Publication"}
+            {mode === "add" ? "New Resource" : "Edit Resource"}
           </div>
           <label style={c.label}>Title *</label>
-          <input style={c.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Full paper title" />
+          <input style={c.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Tutorial/Guide Title" />
           <label style={c.label}>Short Description</label>
           <input style={c.input} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="One-liner for the list view" />
-          <label style={c.label}>Abstract</label>
-          <textarea style={{ ...c.textarea, minHeight: 130 }} value={form.abstract} onChange={e => setForm(f => ({ ...f, abstract: e.target.value }))} placeholder="Full abstract..." />
+          <label style={c.label}>Abstract / Intro</label>
+          <textarea style={{ ...c.textarea, minHeight: 80 }} value={form.abstract} onChange={e => setForm(f => ({ ...f, abstract: e.target.value }))} placeholder="Brief introduction..." />
+          
+          <label style={c.label}>Content (Markdown & HTML supported)</label>
+          <div style={{ display: 'flex', gap: '20px', marginBottom: 14 }}>
+            <textarea 
+              style={{ ...c.textarea, minHeight: 400, marginBottom: 0, flex: 1 }} 
+              value={form.content} 
+              onChange={e => setForm(f => ({ ...f, content: e.target.value }))} 
+              placeholder="# Title\n\nSome text...\n\n```python\nprint('hello')\n```" 
+            />
+            <div style={{ flex: 1, background: '#1a1c23', border: '1px solid #2a2d38', borderRadius: 4, padding: '1rem', color: '#e0e0e0', overflowY: 'auto', maxHeight: 400 }}>
+              <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.12em' }}>Live Preview</div>
+              <div className="prose prose-invert max-w-none prose-sm">
+                <ReactMarkdown 
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    code({node, inline, className, children, ...props}: any) {
+                      const match = /language-(\w+)/.exec(className || '')
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={vscDarkPlus as any}
+                          language={match[1]}
+                          PreTag="div"
+                          {...props}
+                        >
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      )
+                    }
+                  }}
+                >{form.content}</ReactMarkdown>
+              </div>
+            </div>
+          </div>
+
           <div style={c.grid2}>
             <div>
-              <label style={c.label}>Journal</label>
-              <input style={c.input} value={form.journal} onChange={e => setForm(f => ({ ...f, journal: e.target.value }))} placeholder="Journal name" />
+              <label style={c.label}>Journal / Publisher</label>
+              <input style={c.input} value={form.journal} onChange={e => setForm(f => ({ ...f, journal: e.target.value }))} placeholder="(Optional) Where was this published?" />
             </div>
             <div>
               <label style={c.label}>Year</label>
@@ -109,14 +151,14 @@ export default function PublicationsManager() {
               <input style={c.input} value={form.doi} onChange={e => setForm(f => ({ ...f, doi: e.target.value }))} placeholder="10.xxxx/..." />
             </div>
             <div>
-              <label style={c.label}>Link (URL to full paper)</label>
+              <label style={c.label}>Link (URL to external resource)</label>
               <input style={c.input} value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
             </div>
           </div>
           <label style={c.label}>Authors (comma separated)</label>
           <input style={c.input} value={form.authors} onChange={e => setForm(f => ({ ...f, authors: e.target.value }))} placeholder="Suman, A. Mehta, R. Singh" />
           <div style={c.btns}>
-            <button style={c.btnSave} onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save Publication"}</button>
+            <button style={c.btnSave} onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save Resource"}</button>
             <button style={c.btnCancel} onClick={cancel}>Cancel</button>
           </div>
 
@@ -125,7 +167,7 @@ export default function PublicationsManager() {
       )}
 
       <div style={{ marginTop: 24 }}>
-        {items.length === 0 && <div style={{ color: "#444", fontSize: 13 }}>No publications yet.</div>}
+        {items.length === 0 && <div style={{ color: "#444", fontSize: 13 }}>No resources yet.</div>}
         {items.map(item => (
           <div key={item.id} style={c.card}>
             <div style={c.row}>
