@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { store, genId } from "./store";
 import type { Publication } from "./store";
-import MediaUploader from "./MediaUploader";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/prism';
+import vscDarkPlus from 'react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus';
 
 const c = {
   h1: { fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 4 } as React.CSSProperties,
@@ -95,21 +95,25 @@ export default function PublicationsManager() {
           <input style={c.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Tutorial/Guide Title" />
           <label style={c.label}>Short Description</label>
           <input style={c.input} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="One-liner for the list view" />
+
           <label style={c.label}>Abstract / Intro</label>
-          <textarea style={{ ...c.textarea, minHeight: 80 }} value={form.abstract} onChange={e => setForm(f => ({ ...f, abstract: e.target.value }))} placeholder="Brief introduction..." />
-          
+          <div style={{ fontSize: 10, color: '#555', marginBottom: 6 }}>Supports markdown — use [link text](https://url) for hyperlinks</div>
+          <textarea style={{ ...c.textarea, minHeight: 50 }} value={form.abstract} onChange={e => setForm(f => ({ ...f, abstract: e.target.value }))} placeholder="Brief introduction..." />
+
           <label style={c.label}>Content (Markdown & HTML supported)</label>
+          <div style={{ fontSize: 10, color: '#555', marginBottom: 6 }}>Use ## headings to create chapters. Each ## becomes a navigable chapter.</div>
           <div style={{ display: 'flex', gap: '20px', marginBottom: 14 }}>
             <textarea 
               style={{ ...c.textarea, minHeight: 400, marginBottom: 0, flex: 1 }} 
               value={form.content} 
               onChange={e => setForm(f => ({ ...f, content: e.target.value }))} 
-              placeholder="# Title\n\nSome text...\n\n```python\nprint('hello')\n```" 
+              placeholder={"## Chapter 1: Getting Started\n\nSome text...\n\n## Chapter 2: Deep Dive\n\n```python\nprint('hello')\n```"} 
             />
-            <div style={{ flex: 1, background: '#1a1c23', border: '1px solid #2a2d38', borderRadius: 4, padding: '1rem', color: '#e0e0e0', overflowY: 'auto', maxHeight: 400 }}>
-              <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.12em' }}>Live Preview</div>
-              <div className="prose prose-invert max-w-none prose-sm">
+            <div style={{ flex: 1, background: '#0d0f14', border: '1px solid #2a2d38', borderRadius: 6, padding: '1.2rem', color: '#e0e0e0', overflowY: 'auto', maxHeight: 400 }}>
+              <div style={{ fontSize: 10, color: '#666', textTransform: 'uppercase', marginBottom: 12, letterSpacing: '0.12em', borderBottom: '1px solid #1f2230', paddingBottom: 8 }}>Live Preview</div>
+              <div className="prose prose-invert max-w-none prose-sm" style={{ fontSize: 14, lineHeight: 1.8 }}>
                 <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw]}
                   components={{
                     code({node, inline, className, children, ...props}: any) {
@@ -128,7 +132,17 @@ export default function PublicationsManager() {
                           {children}
                         </code>
                       )
-                    }
+                    },
+                    a({node, children, href, ...props}: any) {
+                      return (
+                        <a href={href} target="_blank" rel="noreferrer" style={{ color: '#6db8cc', textDecoration: 'underline' }} {...props}>
+                          {children}
+                        </a>
+                      );
+                    },
+                    img: ({ node, ...props }) => (
+                      <img {...props} style={{ maxWidth: '100%', borderRadius: 6, border: '1px solid #2a2d38' }} loading="lazy" />
+                    ),
                   }}
                 >{form.content}</ReactMarkdown>
               </div>
@@ -137,32 +151,18 @@ export default function PublicationsManager() {
 
           <div style={c.grid2}>
             <div>
-              <label style={c.label}>Journal / Publisher</label>
-              <input style={c.input} value={form.journal} onChange={e => setForm(f => ({ ...f, journal: e.target.value }))} placeholder="(Optional) Where was this published?" />
-            </div>
-            <div>
               <label style={c.label}>Year</label>
               <input style={c.input} type="number" value={form.year} onChange={e => setForm(f => ({ ...f, year: e.target.value }))} placeholder="2024" />
-            </div>
-          </div>
-          <div style={c.grid2}>
-            <div>
-              <label style={c.label}>DOI</label>
-              <input style={c.input} value={form.doi} onChange={e => setForm(f => ({ ...f, doi: e.target.value }))} placeholder="10.xxxx/..." />
             </div>
             <div>
               <label style={c.label}>Link (URL to external resource)</label>
               <input style={c.input} value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
             </div>
           </div>
-          <label style={c.label}>Authors (comma separated)</label>
-          <input style={c.input} value={form.authors} onChange={e => setForm(f => ({ ...f, authors: e.target.value }))} placeholder="Suman, A. Mehta, R. Singh" />
           <div style={c.btns}>
             <button style={c.btnSave} onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save Resource"}</button>
             <button style={c.btnCancel} onClick={cancel}>Cancel</button>
           </div>
-
-          <MediaUploader />
         </div>
       )}
 
@@ -173,8 +173,7 @@ export default function PublicationsManager() {
             <div style={c.row}>
               <div style={{ flex: 1 }}>
                 <div style={c.title}>{item.title}</div>
-                <div style={c.meta}>{(item.authors ?? []).join(", ")}</div>
-                <div style={{ ...c.meta, marginTop: 4 }}>{item.journal} · {item.year}{item.doi ? ` · ${item.doi}` : ""}</div>
+                <div style={c.meta}>{item.year}{item.description ? ` · ${item.description}` : ""}</div>
               </div>
               <div style={c.btns}>
                 <button style={c.btnEdit} onClick={() => startEdit(item)}>Edit</button>
