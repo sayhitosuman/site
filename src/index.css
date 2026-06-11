@@ -1,24 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&family=Instrument+Serif:italic@0;1&family=Space+Grotesk:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Keania+One&family=Economica:wght@400;700&family=Palanquin:wght@400;500;600;700;800;900&family=Nova+Square&family=Iceberg&family=Passero+One&family=DM+Mono:wght@400;500&display=swap');
 
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-serif: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
-  --color-cream: #f8faf9;
+  --font-hero: 'Keania One', cursive;
+  --font-heading: 'Keania One', cursive;
+  --font-subheading: 'Economica', sans-serif;
+  --font-body: 'Palanquin', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --color-cream: #E5E5E5;
   --color-ink: #111111;
-  --color-muted: #3f3f3f;
+  --color-muted: #6b7280;
   --color-rule: #dce0de;
 }
 
 html {
   scroll-behavior: smooth;
   scrollbar-width: none;
-  /* Firefox */
+  background-color: var(--color-cream);
+  transition: background-color 0.35s;
   -ms-overflow-style: none;
-  /* IE and Edge */
 }
 
 html::-webkit-scrollbar {
@@ -27,8 +29,9 @@ html::-webkit-scrollbar {
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--color-cream);
+  font-family: var(--font-body);
+  font-weight: 500;
+  min-height: 100%;
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -37,6 +40,10 @@ body {
   /* Firefox */
   -ms-overflow-style: none;
   /* IE and Edge */
+}
+
+#root {
+  min-height: 100%;
 }
 
 body::-webkit-scrollbar {
@@ -65,24 +72,79 @@ body::-webkit-scrollbar {
 }
 
 .prose p,
-.prose li,
+.prose li {
+  font-family: var(--font-body);
+  font-weight: 800;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 0.3px var(--color-ink);
+}
+
 .prose blockquote {
-  font-family: var(--font-sans);
-  font-weight: 300;
+  font-family: var(--font-heading);
+  font-weight: 500;
   line-height: 1.8;
   letter-spacing: 0.01em;
 }
 
+/* Typography classes */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.hero,
+.hero-name {
+  font-family: var(--font-hero);
+  font-weight: 700;
+}
+
+.subheading {
+  font-family: var(--font-subheading);
+  font-weight: 700;
+}
+
+.nav,
+nav,
+button {
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+.caption,
+caption {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.tag,
+.label,
+.metadata,
+.date {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.quote,
+.pullquote {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
 /* Dark mode overrides */
 html.dark {
-  --color-cream: #090a0b;
+  --color-cream: #2a2a2a;
   --color-ink: #f0f0f0;
-  --color-muted: #a0a0a0;
+  --color-muted: #aaaaaa;
   --color-rule: #1e2022;
 }
 
 html.dark body {
-  background-color: var(--color-cream);
   color: var(--color-ink);
 }
 
@@ -94,13 +156,16 @@ html.dark .prose {
   --tw-prose-hr: var(--color-rule);
 }
 
-/* ── Restoration of Link Colors ── */
+/* ── Restoration of Link Colors (light mode: warmer tone) ── */
 a {
-  color: #3a5f73;
+  font-family: 'Iceberg', cursive;
+  font-size: 1rem;
+  color: #b76e1a;
+  /* warm brown/yellow */
   text-decoration-line: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
-  text-decoration-color: #1e17e8;
+  text-decoration-color: #b76e1a;
   transition: all 0.2s ease;
 }
 
@@ -126,4 +191,123 @@ html.dark a:hover {
 
 html.dark ::selection {
   background-color: #f34e0c44;
+}
+
+/* ── Keyframe Animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floatSlow {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.animate-float {
+  animation: floatSlow 3s ease-in-out infinite;
+}
+
+/* Animation delays */
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fadeInUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Staggered list item animations */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeInUp 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Bottom bar safe area for mobile (iPhone notch etc.) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom));
+  }
 }

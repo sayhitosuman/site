@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { fetchBlogs } from "../data";
+import { fetchBlogs, getBlogs } from "../data";
 import type { BlogPost } from "../data";
 import { SkeletonList } from "../components/Skeleton";
 
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initial = getBlogs();
+  const [blogs, setBlogs] = useState<BlogPost[]>(initial);
+  const [loading, setLoading] = useState(initial.length === 0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function BlogsPage() {
 
   return (
     <section className="max-w-xl mx-auto">
-      <h1 className="font-serif text-2xl mb-6">Blogs</h1>
+      <h1 className="font-[var(--font-serif)] font-normal text-2xl mb-6">Blogs</h1>
 
       {/* Search */}
       <div className="mb-8">

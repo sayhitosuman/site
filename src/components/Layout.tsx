@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import TopoBackground from "./TopoBackground";
+
 
 const nav = [
   { path: "/", label: "~", sectionId: "greeting" },
@@ -15,7 +17,7 @@ function getDarkMode(): boolean {
   if (typeof window === "undefined") return false;
   const stored = localStorage.getItem("darkMode");
   if (stored !== null) return stored === "true";
-  return false;
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -25,8 +27,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("greeting");
   const [dark, setDark] = useState(getDarkMode);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showBars, setShowBars] = useState(true);
   const rafRef = useRef<number | null>(null);
+  const scrollHideRef = useRef<number | null>(null);
 
   // Handle scrollTo state when navigating back to homepage
   useEffect(() => {
@@ -70,14 +73,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const sectionIds = nav.map((n) => n.sectionId).filter(Boolean);
 
       // If scrolled to the bottom, highlight the last section
-      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50;
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5;
       if (atBottom) return sectionIds[sectionIds.length - 1];
 
       let current = sectionIds[0];
       for (const id of sectionIds) {
         const el = document.getElementById(id);
-        if (el && el.offsetTop <= scrollY) {
-          current = id;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const offsetTop = rect.top + window.scrollY;
+          if (offsetTop <= scrollY) {
+            current = id;
+          }
         }
       }
       return current;
@@ -98,6 +105,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, [isHome]);
 
+  // Hide top/bottom bars on scroll down, show on scroll up (mobile only)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let lastY = window.scrollY || 0;
+    const onScroll = () => {
+      if (scrollHideRef.current) cancelAnimationFrame(scrollHideRef.current);
+      scrollHideRef.current = requestAnimationFrame(() => {
+        const y = window.scrollY || 0;
+        // scroll down -> hide; scroll up -> show. Add small hysteresis.
+        if (y - lastY > 10 && y > 60) {
+          setShowBars(false);
+        } else if (lastY - y > 10) {
+          setShowBars(true);
+        }
+        lastY = y;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (scrollHideRef.current) cancelAnimationFrame(scrollHideRef.current);
+    };
+  }, []);
+
   function isActive(n: (typeof nav)[0]) {
     if (isHome) return activeSection === n.sectionId;
     return pathname === n.path || pathname.startsWith(n.path + "/");
@@ -105,103 +138,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex">
-      {/* Mobile Floating Menu Button - visible only on smaller screens */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        aria-label="Open mobile menu"
-        className="fixed bottom-8 right-8 z-50 w-11 h-11 flex items-center justify-center lg:hidden transition-all duration-300 cursor-pointer shadow-lg outline-hidden"
-        style={{
-          background: dark ? 'rgba(25, 27, 29, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          border: `1px solid ${dark ? '#333' : '#eee'}`,
-          color: dark ? '#f34e0c' : '#f34e0c',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '0px',
-        }}
-      >
-        {isMenuOpen ? (
-          <span className="text-xl font-light transform transition-transform duration-300">×</span>
-        ) : (
-          <div className="flex flex-col gap-[4px] items-center">
-            <div className="w-4 h-[1px]" style={{ background: dark ? '#f34e0c' : '#f34e0c' }} />
-            <div className="w-4 h-[1px]" style={{ background: dark ? '#f34e0c' : '#f34e0c' }} />
-            <div className="w-4 h-[1px]" style={{ background: dark ? '#f34e0c' : '#f34e0c' }} />
-          </div>
-        )}
-      </button>
+      <TopoBackground />
+      {/* Top bar (mobile) shown first; bottom bar moved after main content */}
 
-      {/* Mobile Menu Content */}
-      <div
-        className={`fixed bottom-24 right-8 z-50 p-6 flex flex-col items-end gap-6 lg:hidden transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] border origin-bottom-right shadow-2xl ${isMenuOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4 pointer-events-none"
-          }`}
+      {/* Top bar: favicon, home link, and dark mode toggle */}
+      <nav
+        className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 border-b"
         style={{
-          background: dark ? 'rgba(15, 17, 19, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          borderColor: dark ? '#333' : '#eee',
-          backdropFilter: 'blur(15px)',
-          borderRadius: '0px',
+          background: dark ? 'rgba(20, 21, 23, 0.95)' : 'rgba(211, 211, 211, 0.95)',
+          borderColor: dark ? '#444' : '#ccc',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          transform: showBars ? 'translateY(0)' : 'translateY(-100%)',
+          transition: 'transform 220ms ease, opacity 220ms ease',
+          opacity: showBars ? 1 : 0,
         }}
       >
-        {nav.map((n) => (
+        <Link to="/" className="flex items-center gap-1 no-underline">
+          <span className="text-2xl font-bold" style={{ fontFamily: "'Economica', sans-serif", color: dark ? '#ffffff' : '#000000' }}>
+            S
+          </span>
+          <span className="text-base font-semibold" style={{ fontFamily: "'Economica', sans-serif", color: dark ? '#ffffff' : '#000000', letterSpacing: '-0.03em' }}>
+            ayhitosuman
+          </span>
+        </Link>
+
+        <div className="flex items-center gap-2">
           <Link
-            key={n.path}
-            to={n.path}
-            onClick={(e) => {
-              setIsMenuOpen(false);
-              if (isHome && n.sectionId) {
-                e.preventDefault();
-                const el = document.getElementById(n.sectionId);
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              } else if (!isHome && (pathname === n.path || pathname.startsWith(n.path + "/")) && n.path !== "/") {
-                e.preventDefault();
-                navigate("/", { state: { scrollTo: n.sectionId } });
-              }
+            to="/"
+            className="px-3 py-1.5 text-xs tracking-widest uppercase font-bold transition-all duration-300"
+            style={{
+              fontFamily: "'Economica', sans-serif",
+              color: dark ? '#ffffff' : '#000000',
             }}
-            className={`text-[13px] tracking-[0.2em] font-mono no-underline uppercase transition-all duration-300 ${isActive(n)
-              ? "!text-[#f34e0c] font-medium underline underline-offset-4 decoration-1"
-              : dark ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black"
-              }`}
           >
-            {n.label}
+            home
           </Link>
-        ))}
-
-        <div className="h-[1px] w-full mt-2" style={{ background: dark ? '#222' : '#f0f0f0' }} />
-
-        <button
-          onClick={() => {
-            setDark(!dark);
-            setIsMenuOpen(false);
-          }}
-          className="text-[10px] font-mono uppercase tracking-[0.3em] font-semibold py-1 px-2 transition-all flex items-center gap-2"
-          style={{
-            color: dark ? '#fff' : '#000',
-            border: `1px solid ${dark ? '#333' : '#eee'}`,
-          }}
-        >
-          {dark ? 'LIGHT MODE' : 'DARK MODE'}
-        </button>
-      </div>
-
-      {/* Overlay for closing menu */}
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/5 lg:hidden backdrop-blur-[1px]"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
-
-      {/* Dark mode toggle — top right */}
-      <button
-        onClick={() => setDark(!dark)}
-        aria-label="Toggle dark mode"
-        className="fixed top-6 right-6 z-50 px-2.5 py-1.5 hidden lg:flex items-center justify-center transition-all duration-300 cursor-pointer font-mono text-[11px] tracking-wider uppercase"
-        style={{
-          background: 'transparent',
-          border: `1px solid ${dark ? '#444' : '#ccc'}`,
-          color: dark ? '#888' : '#999',
-        }}
-      >
-        {dark ? 'light' : 'dark'}
-      </button>
+          <button
+            onClick={() => setDark(!dark)}
+            aria-label="Toggle dark mode"
+            className="px-3 py-1.5 flex items-center justify-center transition-all duration-300 cursor-pointer text-xs tracking-widest uppercase font-bold"
+            style={{
+              fontFamily: "'Economica', sans-serif",
+              background: dark ? '#333' : '#f0f0f0',
+              border: `1.5px solid ${dark ? '#555' : '#999'}`,
+              color: dark ? '#ffffff' : '#000000',
+            }}
+          >
+            {dark ? 'light' : 'dark'}
+          </button>
+        </div>
+      </nav>
 
       {/* Left sidebar */}
       <nav className="fixed left-20 top-0 h-full w-36 hidden lg:flex flex-col justify-center gap-2.5 z-50">
@@ -222,20 +209,36 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               }
               // Otherwise: default Link navigation to the page
             }}
-            className={`text-[13px] tracking-wide font-mono transition-all duration-300 ease-out no-underline font-light ${isActive(n)
-              ? `!text-[#f34e0c] underline underline-offset-4 decoration-1 decoration-[#f34e0c] ${isHome || n.path === "/contact" ? "font-light" : "font-normal"}`
+            className={`text-sm tracking-wide font-bold transition-all duration-300 ease-out no-underline ${isActive(n)
+              ? `!text-[#f34e0c] underline underline-offset-4 decoration-1.5 decoration-[#f34e0c]`
               : dark
-                ? "!text-[#6db8cc]/70 hover:!text-[#6db8cc] hover:underline underline-offset-4 decoration-[#6db8cc]/30"
-                : "!text-[#3a5f73]/70 hover:!text-[#3a5f73] hover:underline underline-offset-4 decoration-[#3a5f73]/30"
+                ? "!text-[#6db8cc]/80 hover:!text-[#6db8cc] hover:underline underline-offset-4 decoration-[#6db8cc]/40"
+                : "!text-[#333]/80 hover:!text-[#000] hover:underline underline-offset-4 decoration-[#333]/50"
               }`}
+            style={{ fontFamily: "'Economica', sans-serif" }}
           >
             /{n.label}
           </Link>
         ))}
+        
+        {/* Dark mode toggle for desktop */}
+        <button
+          onClick={() => setDark(!dark)}
+          aria-label="Toggle dark mode"
+          className="mt-6 px-3 py-2 flex items-center justify-center transition-all duration-300 cursor-pointer text-xs font-bold tracking-widest uppercase"
+          style={{
+            fontFamily: "'Economica', sans-serif",
+            background: dark ? '#333' : '#f0f0f0',
+            border: `1.5px solid ${dark ? '#555' : '#999'}`,
+            color: dark ? '#ffffff' : '#000000',
+          }}
+        >
+          {dark ? 'light' : 'dark'}
+        </button>
       </nav>
 
       {/* Main content */}
-      <main className="w-full max-w-[620px] mx-auto px-6 py-16 lg:py-24">
+      <main key={pathname} className="w-full max-w-[620px] mx-auto px-6 pt-16 lg:pt-24 pb-24 lg:pb-24 animate-fade-in">
         {children}
 
         <footer className="mt-20 text-center">
@@ -244,6 +247,45 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </p>
         </footer>
       </main>
+
+      {/* Bottom Navigation Bar - mobile only (moved here) */}
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 py-3 border-t overflow-x-auto gap-1.5"
+        style={{
+          background: dark ? 'rgba(20, 21, 23, 0.95)' : 'rgba(211, 211, 211, 0.95)',
+          borderColor: dark ? '#444' : '#ccc',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          transform: showBars ? 'translateY(0)' : 'translateY(100%)',
+          transition: 'transform 220ms ease, opacity 220ms ease',
+          opacity: showBars ? 1 : 0,
+        }}
+      >
+        {nav.filter((n) => n.path !== "/").map((n) => (
+          <Link
+            key={n.path}
+            to={n.path}
+            onClick={(e) => {
+              if (isHome && n.sectionId) {
+                e.preventDefault();
+                const el = document.getElementById(n.sectionId);
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              } else if (!isHome && (pathname === n.path || pathname.startsWith(n.path + "/")) && n.path !== "/") {
+                e.preventDefault();
+                navigate("/", { state: { scrollTo: n.sectionId } });
+              }
+            }}
+            className={`text-sm font-black tracking-wide transition-all duration-300 no-underline py-2 px-2.5 whitespace-nowrap ${
+              isActive(n)
+                ? "!text-[#f34e0c]"
+                : dark ? "!text-white/70 hover:!text-white" : "!text-[#000] hover:!text-[#000]"
+            }`}
+            style={{ fontFamily: "'Economica', sans-serif" }}
+          >
+            {n.label}
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }

@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchProjects } from "../data";
+import { fetchProjects, getProjects } from "../data";
 import type { Project } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
 import { SkeletonLine } from "../components/Skeleton";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cached = getProjects();
+  const [project, setProject] = useState<Project | null>(cached.find((p) => p.id === id) || null);
+  const [loading, setLoading] = useState(project === null);
 
   useEffect(() => {
     fetchProjects().then((all) => {

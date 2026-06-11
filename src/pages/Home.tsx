@@ -1,8 +1,44 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { fetchProjects, fetchPublications, fetchBlogs, fetchNotes, fetchBrainDumps } from "../data";
+import { fetchProjects, fetchPublications, fetchBlogs, fetchNotes, fetchBrainDumps, getProjects, getPublications, getBlogs, getNotes, getBrainDumps } from "../data";
 import type { Project, Publication, BlogPost, Note, BrainDump } from "../data";
 import { SkeletonList, SkeletonCard } from "../components/Skeleton";
+
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isInView };
+}
+
+function AnimateOnScroll({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, isInView } = useInView();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
 
 function Divider() {
   return <hr className="border-[var(--color-rule)] my-14" />;
@@ -10,18 +46,33 @@ function Divider() {
 
 function SectionLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
-    <Link to={to} className="text-sm font-light mt-6 inline-block">
-      {children} →
+    <Link to={to} className="text-sm font-light mt-6 inline-block group">
+      {children} <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
     </Link>
   );
 }
 
 export default function Home() {
-  const [projects, setProjects] = useState<Project[] | null>(null);
-  const [publications, setPublications] = useState<Publication[] | null>(null);
-  const [blogs, setBlogs] = useState<BlogPost[] | null>(null);
-  const [notes, setNotes] = useState<Note[] | null>(null);
-  const [brainDumps, setBrainDumps] = useState<BrainDump[] | null>(null);
+  const [projects, setProjects] = useState<Project[] | null>(() => {
+    const cached = getProjects();
+    return cached.length ? cached : null;
+  });
+  const [publications, setPublications] = useState<Publication[] | null>(() => {
+    const cached = getPublications();
+    return cached.length ? cached : null;
+  });
+  const [blogs, setBlogs] = useState<BlogPost[] | null>(() => {
+    const cached = getBlogs();
+    return cached.length ? cached : null;
+  });
+  const [notes, setNotes] = useState<Note[] | null>(() => {
+    const cached = getNotes();
+    return cached.length ? cached : null;
+  });
+  const [brainDumps, setBrainDumps] = useState<BrainDump[] | null>(() => {
+    const cached = getBrainDumps();
+    return cached.length ? cached : null;
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,9 +102,10 @@ export default function Home() {
   return (
     <>
       {/* 1. Greeting */}
+      <AnimateOnScroll delay={0}>
       <section id="greeting">
-        <h1 className="font-[var(--font-serif)] text-3xl md:text-4xl font-normal leading-tight italic">
-          Hello, I'm Suman Mandal🙏
+        <h1 className="font-[var(--font-serif)] text-2xl md:text-3xl font-normal leading-tight" style={{ fontWeight: 400 }}>
+          Hello, I'm Suman Mandal👋 
         </h1>
         <div className="mt-6 text-base leading-relaxed text-[var(--color-muted)] space-y-4">
           <p>
@@ -69,16 +121,20 @@ export default function Home() {
           </p>
         </div>
       </section>
+      </AnimateOnScroll>
 
       {error && (
+        <AnimateOnScroll delay={100}>
         <div className="mt-8 p-4 bg-red-900/10 border border-red-900/20 rounded text-red-500 text-sm">
           ⚠ Could not sync latest data. Some content might be slightly outdated.
         </div>
+        </AnimateOnScroll>
       )}
 
       <Divider />
 
       {/* 2. Projects */}
+      <AnimateOnScroll delay={100}>
       <section id="projects">
         <p className="text-base leading-relaxed mb-8">
           Along the way, I've built a few things I'm proud of.
@@ -109,10 +165,12 @@ export default function Home() {
         )}
         <SectionLink to="/projects">all projects</SectionLink>
       </section>
+      </AnimateOnScroll>
 
       <Divider />
 
       {/* 3. Blogs */}
+      <AnimateOnScroll delay={150}>
       <section id="blogs">
         <p className="text-base leading-relaxed mb-8">
           I also write — long-form, when the thought demands it.
@@ -143,14 +201,15 @@ export default function Home() {
         )}
         <SectionLink to="/blogs">all blogs</SectionLink>
       </section>
+      </AnimateOnScroll>
 
       <Divider />
 
       {/* 4. Publications */}
+      <AnimateOnScroll delay={200}>
       <section id="publications">
         <p className="text-base leading-relaxed mb-8">
-          I want to add course material resources to help others, guides, or anything lecture type things.
-        </p>
+          Here are few resources that ive made and used which can help in your journey also        </p>
         {!publications ? (
           <SkeletonList count={2} />
         ) : (
@@ -172,10 +231,12 @@ export default function Home() {
         )}
         <SectionLink to="/publications">all resources</SectionLink>
       </section>
+      </AnimateOnScroll>
 
       <Divider />
 
       {/* 5. Notes */}
+      <AnimateOnScroll delay={250}>
       <section id="notes">
         <p className="text-base leading-relaxed mb-8">
           Notes — less polished, more honest. These are opinions, not facts.
@@ -201,10 +262,12 @@ export default function Home() {
         )}
         <SectionLink to="/notes">all notes</SectionLink>
       </section>
+      </AnimateOnScroll>
 
       <Divider />
 
       {/* 6. Brain Dump */}
+      <AnimateOnScroll delay={300}>
       <section id="brain-dump">
         <p className="text-base leading-relaxed mb-6">
           Brain Dump — fleeting thoughts, barely edited.
@@ -257,10 +320,12 @@ export default function Home() {
         )}
         <SectionLink to="/brain-dump">all brain dumps</SectionLink>
       </section>
+      </AnimateOnScroll>
 
       <Divider />
 
       {/* 7. Painting */}
+      <AnimateOnScroll delay={350}>
       <section id="painting">
         <p className="text-base leading-relaxed">
           When I'm not at a screen, I{" "}
@@ -277,9 +342,11 @@ export default function Home() {
           sometimes — when the paint dries and words don't.
         </p>
       </section>
+      </AnimateOnScroll>
       <Divider />
 
       {/* 8. Contact */}
+      <AnimateOnScroll delay={400}>
       <section id="contact">
         <p className="text-base leading-relaxed">
           Say hello. I'm most active on{" "}
@@ -292,6 +359,7 @@ export default function Home() {
           <Link to="/contact">contact page</Link>.
         </p>
       </section>
+      </AnimateOnScroll>
     </>
   );
 }

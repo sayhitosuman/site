@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchPublications } from "../data";
+import { fetchPublications, getPublications } from "../data";
 import type { Publication } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
 import { SkeletonLine } from "../components/Skeleton";
@@ -46,8 +46,9 @@ function setLastChapter(pubId: string, idx: number) {
 
 export default function PublicationDetail() {
   const { id } = useParams<{ id: string }>();
-  const [pub, setPub] = useState<Publication | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cached = getPublications();
+  const [pub, setPub] = useState<Publication | null>(cached.find((p) => p.id === id) || null);
+  const [loading, setLoading] = useState(pub === null);
   const [currentChapter, setCurrentChapter] = useState(0);
   const [tocOpen, setTocOpen] = useState(false);
 

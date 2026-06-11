@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchBlogs } from "../data";
+import { fetchBlogs, getBlogs } from "../data";
 import type { BlogPost } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
 import { SkeletonLine } from "../components/Skeleton";
@@ -15,8 +15,9 @@ function formatDate(d: string) {
 
 export default function BlogDetail() {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cached = getBlogs();
+  const [post, setPost] = useState<BlogPost | null>(cached.find((b) => b.id === id) || null);
+  const [loading, setLoading] = useState(post === null);
 
   useEffect(() => {
     fetchBlogs().then((all) => {

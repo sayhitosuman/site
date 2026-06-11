@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchNotes } from "../data";
+import { fetchNotes, getNotes } from "../data";
 import type { Note } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
 import { SkeletonLine } from "../components/Skeleton";
@@ -15,8 +15,9 @@ function formatDate(d: string) {
 
 export default function NoteDetail() {
   const { id } = useParams<{ id: string }>();
-  const [note, setNote] = useState<Note | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cached = getNotes();
+  const [note, setNote] = useState<Note | null>(cached.find((n) => n.id === id) || null);
+  const [loading, setLoading] = useState(note === null);
 
   useEffect(() => {
     fetchNotes().then((all) => {

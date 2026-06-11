@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { fetchNotes } from "../data";
+import { fetchNotes, getNotes } from "../data";
 import type { Note } from "../data";
 import { SkeletonList } from "../components/Skeleton";
 
 export default function NotesPage() {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initial = getNotes();
+  const [notes, setNotes] = useState<Note[]>(initial);
+  const [loading, setLoading] = useState(initial.length === 0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function NotesPage() {
 
   return (
     <section className="max-w-xl mx-auto">
-      <h1 className="font-serif text-2xl mb-6">Notes</h1>
+      <h1 className="font-[var(--font-serif)] font-normal text-2xl mb-6">Notes</h1>
 
       {/* Search */}
       <div className="mb-8">

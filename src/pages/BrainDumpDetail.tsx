@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchBrainDumps } from "../data";
+import { fetchBrainDumps, getBrainDumps } from "../data";
 import { toggleLikeCount } from "../api";
 import type { BrainDump } from "../data";
 import MarkdownContent from "../components/MarkdownContent";
@@ -8,8 +8,9 @@ import { SkeletonLine } from "../components/Skeleton";
 
 export default function BrainDumpDetail() {
   const { id } = useParams();
-  const [dumps, setDumps] = useState<BrainDump[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initial = getBrainDumps();
+  const [dumps, setDumps] = useState<BrainDump[]>(initial);
+  const [loading, setLoading] = useState(initial.length === 0);
 
   useEffect(() => {
     fetchBrainDumps().then((all) => {

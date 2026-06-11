@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { fetchProjects } from "../data";
+import { fetchProjects, getProjects } from "../data";
 import type { Project } from "../data";
 import { SkeletonList } from "../components/Skeleton";
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initial = getProjects();
+  const [projects, setProjects] = useState<Project[]>(initial);
+  const [loading, setLoading] = useState(initial.length === 0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function ProjectsPage() {
 
   return (
     <section className="max-w-xl mx-auto">
-      <h1 className="font-serif text-2xl mb-6">Projects</h1>
+      <h1 className="font-[var(--font-serif)] font-normal text-2xl mb-6">Projects</h1>
 
       {/* Search */}
       <div className="mb-8">

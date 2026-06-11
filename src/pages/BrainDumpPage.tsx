@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { fetchBrainDumps, BRAIN_DUMP_CATEGORIES } from "../data";
+import { fetchBrainDumps, getBrainDumps, BRAIN_DUMP_CATEGORIES } from "../data";
 import { toggleLikeCount } from "../api";
 import type { BrainDump } from "../data";
 import { SkeletonCard } from "../components/Skeleton";
@@ -9,8 +9,9 @@ type SortMode = "recent" | "oldest" | "popular" | "unpopular";
 
 export default function BrainDumpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [dumps, setDumps] = useState<BrainDump[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initial = getBrainDumps();
+  const [dumps, setDumps] = useState<BrainDump[]>(initial);
+  const [loading, setLoading] = useState(initial.length === 0);
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [activeCategory, setActiveCategory] = useState<string | null>(
@@ -71,7 +72,7 @@ export default function BrainDumpPage() {
 
   return (
     <section className="max-w-xl mx-auto">
-      <h1 className="font-serif text-2xl mb-6">Brain Dump</h1>
+      <h1 className="font-[var(--font-serif)] font-normal text-2xl mb-6">Brain Dump</h1>
 
       <div className="text-[10px] uppercase tracking-widest text-[var(--color-muted)] mb-3">Tags / Moods</div>
 
