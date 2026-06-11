@@ -17,7 +17,7 @@ import About from "./pages/About";
 import Resume from "./pages/Resume";
 import Transcript from "./pages/Transcript";
 import NotFound from "./pages/NotFound";
-import reactLogo from "./assets/react.svg";
+import reactLogo from "/react.svg";
 import viteLogo from "/vite.svg";
 
 // Admin / CMS
