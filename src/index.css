@@ -73,11 +73,8 @@ body::-webkit-scrollbar {
 
 .prose p,
 .prose li {
-  font-family: var(--font-body);
-  font-weight: 800;
   line-height: 1.8;
   letter-spacing: 0.02em;
-  -webkit-text-stroke: 0.3px var(--color-ink);
 }
 
 .prose blockquote {
@@ -156,12 +153,10 @@ html.dark .prose {
   --tw-prose-hr: var(--color-rule);
 }
 
-/* ── Restoration of Link Colors (light mode: warmer tone) ── */
+/* ── Link Colors (inherits body font by default) ── */
 a {
-  font-family: 'Iceberg', cursive;
-  font-size: 1rem;
+  font-weight: 500;
   color: #b76e1a;
-  /* warm brown/yellow */
   text-decoration-line: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
